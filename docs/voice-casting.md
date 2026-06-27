@@ -38,9 +38,27 @@
 ## 引擎路由(三層)
 
 `voice/a<actor>/<key>.voc`(專屬,8 角色 109 句)→ `voice/npc/<key>.voc`(雜魚 S3 沉穩 + per-actor ±6% 變調)
-→ `voice/<key>.voc`(通用,印第馬蓋先)。F9 切 `voice_en/`(英配)。
+→ `voice/<key>.voc`(通用,印第馬蓋先)。**F9 切 `voice_en/`(英配),同樣三層路由**。
+
+## 英文配音(F9,同樣 per-character)
+
+英文軌走相同的靜態講者地圖(`tools/dub_cast_en.py`,英文取自 `crusade_en_dub_manifest.tsv`),
+重要角色各配對味的英文聲線(對齊電影演員,皆 edge-tts 合法):
+
+| 角色 | 中文聲線 | 英文聲線 |
+|---|---|---|
+| 印第(ego) | `zh-CN-Yunxi` 馬蓋先 | `en-US-Guy`(flat 通用) |
+| 亨利(2) | `zh-TW-YunJhe` | `en-GB-Ryan` -8%/-6Hz(康納萊英腔) |
+| 艾爾莎(3) | `zh-TW-HsiaoChen` 女 | `en-GB-Sonia` -2%(英國女聲) |
+| 馬可斯(4) | `zh-CN-Yunyang` | `en-GB-Thomas` -6%/-4Hz(英國老紳士) |
+| 醉漢(5) | `zh-CN-Yunxia` | `en-AU-William` -8%/+4Hz(澳腔含糊) |
+| 唐納文(6) | `zh-HK-WanLung` | `en-US-Steffan` -2%/-4Hz(理性滑順反派) |
+| 教練(9) | `zh-CN-Yunjian` | `en-US-Roger` +0%/-2Hz(美式爽朗) |
+| 聖杯騎士(10@86) | `zh-TW-YunJhe` 極慢 | `en-GB-Thomas` -16%/-12Hz(古英腔極慢) |
+
+> 修正了「英文模式下艾爾莎變男聲」的問題——英文也按角色性別/口音配。雜魚仍走 `voice_en/<key>` flat(Guy)。
 
 ## 配音覆蓋
 
-- 專屬:a2=37/38、a3=18、a4=19、a5=20、a6=9、a9=4、a10=2 ≈ **109 句 / 7 角色**。
-- npc 雜魚:1609 句(S3 + 變調)。通用印第:1715 句。voice_en 英配:1715 句。
+- 中文專屬:a2=37/38、a3=18、a4=19、a5=20、a6=9、a9=4、a10=2 ≈ **109 句 / 7 角色**;npc 雜魚 1609 句;通用印第 1715 句。
+- 英文專屬:**110 句 / 7 角色**(`voice_en/a<actor>/`);其餘走 `voice_en/<key>` flat 1715 句(en-US-Guy)。
