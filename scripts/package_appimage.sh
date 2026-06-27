@@ -20,9 +20,10 @@ ldd "$SV" | awk '/=>/{print $3}' | grep -E '\.so' \
   | grep -viE '/(libc|libm|libpthread|libdl|librt|ld-linux|libstdc\+\+|libgcc_s|libX11|libxcb|libXau|libXdmcp)\.' \
   | while read -r so; do [ -f "$so" ] && cp -Ln "$so" "$APPDIR/usr/lib/" || true; done
 
-# 內嵌中文遊戲(LFL + 字型 + CD 音樂 track*.wav 若有)
+# 內嵌中文遊戲(LFL + 字型 + 中文語音 voice/*.voc + CD 音樂 track*.wav 若有)
 cp "$GAME"/*.LFL "$APPDIR/game/"
 cp "$GAME"/chinese_gb16x12.fnt "$APPDIR/game/"
+if [ -d "$GAME/voice" ]; then mkdir -p "$APPDIR/game/voice"; cp "$GAME"/voice/*.voc "$APPDIR/game/voice/" 2>/dev/null || true; fi
 cp "$GAME"/track*.wav "$APPDIR/game/" 2>/dev/null || true
 
 cat > "$APPDIR/AppRun" <<'RUN'

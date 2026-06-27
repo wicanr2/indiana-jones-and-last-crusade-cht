@@ -1,3 +1,19 @@
+diff --git a/engines/scumm/actor.cpp b/engines/scumm/actor.cpp
+index 7c48e492..c1f93d98 100644
+--- a/engines/scumm/actor.cpp
++++ b/engines/scumm/actor.cpp
+@@ -3532,6 +3532,11 @@ void ScummEngine::actorTalk(const byte *msg) {
+ 	if (VAR_CHARCOUNT != 0xFF)
+ 		VAR(VAR_CHARCOUNT) = 0;
+ 	_haveActorSpeechMsg = true;
++	// CHT non-talkie TTS dub: play a synthesised Chinese voice for this line (if a
++	// matching voice/<hash>.voc exists). Plays on the talk channel so the existing
++	// "hold subtitle while talk sound runs" logic syncs the subtitle duration.
++	if (_useCJKMode && (_language == Common::ZH_CHN || _language == Common::ZH_TWN) && _sound)
++		_sound->playChtVoice(_charsetBuffer);
+ #ifdef USE_TTS
+ 	stopTextToSpeech();
+ #endif
 diff --git a/engines/scumm/charset.cpp b/engines/scumm/charset.cpp
 index 81c14ae2..17fb8b87 100644
 --- a/engines/scumm/charset.cpp
@@ -176,6 +192,78 @@ index 81c14ae2..17fb8b87 100644
  	}
  #endif
  	return CharsetRendererV3::getDrawHeightIntern(chr);
+diff --git a/engines/scumm/sound.cpp b/engines/scumm/sound.cpp
+index bfb33823..36357bf3 100644
+--- a/engines/scumm/sound.cpp
++++ b/engines/scumm/sound.cpp
+@@ -23,6 +23,7 @@
+ #include "common/util.h"
+ #include "common/ptr.h"
+ #include "common/substream.h"
++#include "common/memstream.h"
+ 
+ #include "scumm/actor.h"
+ #include "scumm/file.h"
+@@ -125,6 +126,46 @@ void Sound::startSound(int sound, int offset, int channel, int flags, int freq,
+ 	addSoundToQueue(sound, offset, channel, flags, freq, pan, volume);
+ }
+ 
++// CHT non-talkie TTS dub. The original v3 game has no speech; we synthesise a key
++// from the *Chinese (GBK) characters only* of the just-displayed line (ASCII /
++// control / punctuation ignored so it's identical to the build_voice dub key), and
++// play game-dir voice/<key>.voc on the talk channel with kTalkSoundID so the engine's
++// existing "hold text while talk sound runs" logic (actorTalk) syncs the subtitle.
++void Sound::playChtVoice(const byte *buf) {
++	if (!buf || !*buf)
++		return;
++	uint32 h = 2166136261u; // FNV-1a, GBK double-byte chars only
++	int n = 0;
++	for (const byte *p = buf; *p; ) {
++		if (p[0] >= 0x81 && p[0] <= 0xFE && p[1]) {
++			h = (h ^ p[0]) * 16777619u;
++			h = (h ^ p[1]) * 16777619u;
++			p += 2; n++;
++		} else {
++			p++;
++		}
++	}
++	if (n == 0)
++		return; // no CJK -> nothing dubbed
++	Common::String name = Common::String::format("voice/%08x.voc", (unsigned)h);
++	ScummFile f(_vm);
++	if (!_vm->openFile(f, Common::Path(name)))
++		return;
++	uint32 sz = (uint32)f.size();
++	if (!sz || sz > 8 * 1024 * 1024)
++		return;
++	byte *data = (byte *)malloc(sz);
++	if (!data)
++		return;
++	f.read(data, sz);
++	Common::MemoryReadStream *ms = new Common::MemoryReadStream(data, sz, DisposeAfterUse::YES);
++	Audio::SeekableAudioStream *voc = Audio::makeVOCStream(ms, Audio::FLAG_UNSIGNED, DisposeAfterUse::YES);
++	if (!voc)
++		return;
++	_mixer->stopID(kTalkSoundID);
++	_mixer->playStream(Audio::Mixer::kSpeechSoundType, _talkChannelHandle, voc, kTalkSoundID);
++}
++
+ void Sound::addSoundToQueue(int sound, int offset, int channel, int flags, int freq, int pan, int volume) {
+ 	assert(_soundQueuePos < ARRAYSIZE(_soundQueue));
+ 	_soundQueue[_soundQueuePos].sound = sound;
+diff --git a/engines/scumm/sound.h b/engines/scumm/sound.h
+index 2b9b1e66..5aa46772 100644
+--- a/engines/scumm/sound.h
++++ b/engines/scumm/sound.h
+@@ -120,6 +120,8 @@ public:
+ 	Sound(ScummEngine *parent, Audio::Mixer *mixer, bool useReplacementAudioTracks);
+ 	~Sound() override;
+ 	virtual void startSound(int sound, int heOffset = 0, int heChannel = 0, int heFlags = 0, int heFreq = 0, int hePan = 0, int heVol = 0);
++	// CHT non-talkie TTS dub: play voice/<hash>.voc for a displayed CJK line on the talk channel.
++	void playChtVoice(const byte *buf);
+ 	virtual void addSoundToQueue(int sound, int heOffset = 0, int heChannel = 0, int heFlags = 0, int heFreq = 0, int hePan = 0, int heVol = 0);
+ 	void processSound();
+ 	virtual void modifySound(int sound, int offset, int frequencyShift, int pan, int volume, int flags) {};
 diff --git a/engines/scumm/string.cpp b/engines/scumm/string.cpp
 index ebb998ec..511bd5a6 100644
 --- a/engines/scumm/string.cpp

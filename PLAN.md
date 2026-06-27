@@ -9,7 +9,9 @@
 - ✅ **階段 6 翻譯**:**1859/1859 唯一字串全翻完**(印第口吻+黑色幽默;羅馬數字/JEHOVA 拼字謎/聖杯描述等謎題精確保留;人名/控制碼/地板字母格/德語梗刻意留原樣)。管線:`tools/assemble_scummtr.py`(英文源+`zh.tsv` en→zh → 組裝 import-ready scummtr.txt;untranslated 自動留原文)。中文-only by-ID:`translations/crusade_zh_by_id.tsv`。
 - ✅ **階段 3-5 引擎整合(中文已在 ScummVM 顯示!)**:全新編 ScummVM(`scripts/build_cht_engine.sh`)+ 套 `patches/scumm-cht-indy3.patch`(zak ZH-CJK + INDY3 適配);字型重用 `chinese_gb16x12.fnt`(12×12 GBK);patched scummtr(zak scummtr-cjk + 本專案 `_checkRsc` CJK 修正)`encode-gbk` + 匯入(`scripts/import_cht.sh`)。**動詞面板、物件名、句子列全中文正常渲染**(截圖 `screenshots/crusade_cht_verbs.png`、`crusade_cht_look.png`)。
   - 關鍵修正:① ScummVM HEAD 的 `case ZH_CHN` 對 INDY3 載 numChar=**8178**(GB2312),但字型是 **23940**(full GBK)→ 把 INDY3 從 8178 分支移到 23940 分支。② scummtr `_checkRsc` 把物件名結尾的 GBK trail byte `0xFE`(如「件」)誤判 truncated → 改 CJK-aware。③ 跑時 `--platform=fmtowns --language=cn`(否則 auto-detect 選錯 VGA 變體 → Bad ID）。
-- ⏳ **下一步**:階段 7 中文 TTS 配音(沿用 FOA dub pipeline)、階段 8 三平台打包(`retro-game-cht-package` skill)。
+- ✅ **階段 7 中文 TTS 配音(無中生有的新子系統,已實作)**:原版無語音 → 在 `actorTalk` 加 `Sound::playChtVoice`(FNV-1a 雜湊「顯示字串的 GBK 中文字 bytes」→ 播 `voice/<key>.voc` 於 talk channel kTalkSoundID,引擎既有「語音播放時 hold 字幕」邏輯自動同步)。dub:`tools/build_crusade_voice.py`(產 manifest,key 與引擎完全一致)+ `scripts/dub_crusade.sh`(docker edge-tts 印第馬蓋仙聲線 zh-TW-YunJheNeural → 11025/8-bit VOC),**1715 句全配完**。key 對齊已用「引擎會雜湊的同款 GBK bytes」驗證(真實對白 → voc 存在)。⚠️ 聽感/同步需有喇叭的機器驗(headless 聽不到,同 FOA)。
+- ✅ **階段 8 打包(Linux)**:`scripts/package_appimage.sh` → 單檔 AppImage(含遊戲+字型+**1715 語音**),41M,實測獨立啟動顯示中文。Windows/macOS 可循 `retro-game-cht-package` skill(docker mingw / CI)。
+- ⏳ **下一步**:Windows/macOS 打包;CD 音樂軌(track*.wav)併入;角色分聲線(目前單一印第聲線)。
 - ⚠️ 版權:英文原劇本(`crusade_en.txt`/`zh.tsv`)+ 遊戲 LFL gitignore 不入庫;只提交 patch / 工具 / 中文-only by-ID / 截圖。
 
 ## 已完成(偵察)
