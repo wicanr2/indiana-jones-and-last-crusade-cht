@@ -1,0 +1,22 @@
+# 版權遊戲資料 / CD 映像 —— 一律不入庫(自備合法版本)
+*.zip
+*.bin
+*.cue
+*.iso
+_extract/
+game/
+extracted/
+*.LFL
+*.lfl
+MONSTER.*
+
+# 打包成品 / cross-build 中間產物 / dev-setup(本機自留)
+dist-all/
+build/
+build-win/
+*.AppImage
+
+# 雜項
+__pycache__/
+*.pyc
+.DS_Store
