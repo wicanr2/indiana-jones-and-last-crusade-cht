@@ -1,0 +1,12 @@
+# 角色聲線設定:actor<TAB>voice<TAB>rate<TAB>pitch<TAB>說明(角色)
+# actor 號靠 -d3 收 CHTMAP 取得。印第(1)走通用 voice/ 不在此;雜魚走 voice/npc/ 不在此。
+# 這裡只列「重要/有特色」角色。對應 docs/voice-casting.md。
+# 已確認 actor:印第=1(通用)、拳擊教練=9。其餘待 CHTMAP 補。
+9	zh-CN-YunjianNeural	+0%	-4Hz	拳擊教練(爽朗有勁)
+# --- 以下待填 actor 號(從 CHTMAP)---
+# ?	zh-TW-YunJheNeural	-14%	-18Hz	亨利老爸(老成慢深)
+# ?	zh-CN-YunzeNeural	-2%	-4Hz	唐納文反派(沉穩奸滑)
+# ?	zh-TW-HsiaoChenNeural	-4%	-2Hz	艾爾莎(成熟女聲)
+# ?	zh-CN-YunyangNeural	-8%	-8Hz	馬可斯(溫厚老紳士)
+# ?	zh-TW-YunJheNeural	-18%	-20Hz	聖杯騎士(古老極慢)
+# ?	zh-CN-YunjianNeural	-6%	-10Hz	佛格上校(冷峻威壓)
