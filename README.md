@@ -12,11 +12,11 @@
 |---|---|---|
 | SCUMM 版本 | v5(`ATLANTIS.001` 容器) | **v3**(`NN.LFL` 資源) |
 | 平台版本 | DOS CD talkie | **FM-Towns CD**(.bin/.cue,Jp-En) |
-| 語音 | 有(中文配音 5552 點) | **無語音 → 純字幕中文化** |
+| 語音 | 有(重導既有語音 5552 點) | 原版**無語音** → 字幕為主;**中文 TTS 配音為加值新功能**(無中生有,非重導,見 PLAN) |
 | 音樂 | iMUSE | **Red Book CD 音軌**(ScummVM 自放) |
 | 繪字路徑 | v5/v7 `ZH_TWN` Big5 | **FM-Towns SJIS / `ZH_CHN` 路徑(待定)** |
 
-最像的技術前例不是亞特蘭提斯,是 FM-Towns 的 [Zak McKracken 繁中化](https://github.com/wicanr2)(`zak-fmtowns-zhtw`)。
+最關鍵的技術前例不是亞特蘭提斯,是**同類**(SCUMM v3 + FM-Towns)的 **Zak McKracken FM-Towns 繁中化**(本機 `~/zak-cht`,已完成可玩):scummtr 抽字 + `scummvm-zhtw.patch`(CharsetRendererV3/TownsV3 + `chinese_gb16x12.fnt` 12×12 GBK)+ encode-gbk。最後聖戰主要工作 = 把該 patch 的 `GID_ZAK` 條件擴到 `GID_INDY3`。
 
 ## 版權
 
