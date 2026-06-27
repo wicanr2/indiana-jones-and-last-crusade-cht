@@ -20,3 +20,9 @@ build-win/
 __pycache__/
 *.pyc
 .DS_Store
+
+# 抽出的原版英文劇本(LucasArts 版權)+ 衍生/組裝檔 — 不入庫
+translations/crusade_en.txt
+translations/todo_en.txt
+translations/scummtr_zh.txt
+translations/zh.tsv

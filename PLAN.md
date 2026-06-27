@@ -2,6 +2,14 @@
 
 承前作亞特蘭提斯的節奏,但按 v3 / FM-Towns / 無語音調整。每階段先建可驗證的成功標準再動手。
 
+## 進度
+
+- ✅ **階段 1 取資料**:bchunk 拆 FM-Towns CD `.bin/.cue` → 資料軌 `INDY3ENG/*.LFL`(90 檔)。
+- ✅ **階段 2 抽字**:`scummtr -g indy3towns -rwh -o`(預編 scummtr 0.5.1)→ 2172 行、1859 個唯一字串。
+- ✅ **階段 6 翻譯**:**1859/1859 唯一字串全翻完**(印第口吻+黑色幽默;羅馬數字/JEHOVA 拼字謎/聖杯描述等謎題精確保留;人名/控制碼/地板字母格/德語梗刻意留原樣)。管線:`tools/assemble_scummtr.py`(英文源+`zh.tsv` en→zh → 組裝 import-ready scummtr.txt;untranslated 自動留原文)。中文-only by-ID:`translations/crusade_zh_by_id.tsv`。
+- ⏳ **下一步**:階段 3-5 繪字路徑(套 `~/zak-cht/patches/scummvm-zhtw.patch` 擴 `GID_INDY3`)+ 字型(`chinese_gb16x12.fnt`)+ encode-gbk + scummtr 匯入 → 跑出中文畫面;再 階段 7 配音、階段 8 打包。
+- ⚠️ 版權:英文原劇本(`crusade_en.txt`/`zh.tsv`)gitignore 不入庫;只提交中文-only by-ID + 工具。
+
 ## 已完成(偵察)
 
 - 確認素材:`Indiana Jones and the Last Crusade (1989)(LucasFilm)(Jp-En).bin/.cue` = **FM-Towns CD 映像**。
