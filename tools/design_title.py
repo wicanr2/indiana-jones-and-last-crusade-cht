@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """為 crusade 火車車廂標題設計中文片名,風格對齊金色 INDIANA JONES / LAST CRUSADE:
   main : 印第安納·瓊斯  (橘→金漸層,厚重,深色描邊)
-  sub  : 最後聖戰       (黃金漸層)
+  sub  : 聖戰奇兵       (黃金漸層)
 大圖渲染再 nearest 縮成 retro 像素;合成到實機標題圖預覽;烘 crusade_title.spr 給引擎疊圖。
 位置用 game(320x240) 座標;crusade_cht_title.png = 960x720 = 320x240 ×3(無 letterbox)。
 """
@@ -45,7 +45,7 @@ def render(text, ch_h, top, bot, outline, shear):
 
 # main: 橘→金(像 INDIANA JONES),厚、微斜;sub: 黃金(像 LAST CRUSADE)
 main = render("印第安納·瓊斯", 13, (255,150,30), (250,205,0), (70,28,0,255), 0.10)
-sub  = render("最後聖戰",      12, (255,225,80), (220,150,0), (60,30,0,255), 0.12)
+sub  = render("聖戰奇兵",      12, (255,225,80), (220,150,0), (60,30,0,255), 0.12)
 main.save("design_title/cht_main.png"); sub.save("design_title/cht_sub.png")
 print("main",main.size,"sub",sub.size,"pos",(GX_C,MAIN_Y,SUB_Y))
 

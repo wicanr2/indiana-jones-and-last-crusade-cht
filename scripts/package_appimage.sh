@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 把中文最後聖戰(crusade scummvm + game-cht)打成單檔 AppImage。
+# 把中文聖戰奇兵(crusade scummvm + game-cht)打成單檔 AppImage。
 # full:內嵌遊戲 LFL + 字型(+ 有 track*.wav 就含 FM-Towns CD 音樂)→ 開箱即玩(個人自留,含版權)。
 # 產物:dist-all/linux/IndyCrusade-CHT-FULL-x86_64.AppImage
 set -euo pipefail
@@ -41,7 +41,7 @@ cat > "$APPDIR/indycrusade-cht.desktop" <<DESK
 [Desktop Entry]
 Type=Application
 Name=Indy Crusade CHT
-Comment=印第安納·瓊斯:最後聖戰 繁體中文版
+Comment=印第安納·瓊斯:聖戰奇兵 繁體中文版
 Exec=AppRun
 Icon=indycrusade-cht
 Categories=Game;

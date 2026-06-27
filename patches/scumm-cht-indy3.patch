@@ -193,7 +193,7 @@ index 81c14ae2..17fb8b87 100644
  #endif
  	return CharsetRendererV3::getDrawHeightIntern(chr);
 diff --git a/engines/scumm/gfx.cpp b/engines/scumm/gfx.cpp
-index bf85f13c..c66ff70a 100644
+index bf85f13c..f584c75e 100644
 --- a/engines/scumm/gfx.cpp
 +++ b/engines/scumm/gfx.cpp
 @@ -548,6 +548,72 @@ void ScummEngine::drawDirtyScreenParts() {
@@ -204,7 +204,7 @@ index bf85f13c..c66ff70a 100644
 +	drawCrusadeTitle(); // INDY3 CHT title overlay (no-op outside the title room)
 +}
 +
-+// INDY3 CHT: blit the designed Chinese title (印第安納·瓊斯 / 最後聖戰) onto the
++// INDY3 CHT: blit the designed Chinese title (印第安納·瓊斯 / 聖戰奇兵) onto the
 +// train-car title screen. crusade_title.spr = [u16 x][u16 y][u16 w][u16 h] + RGBA px.
 +// Opaque px colour-matched to the live palette (8-bit) or written as RGB (FM-Towns 16-bit).
 +void ScummEngine::drawCrusadeTitle() {

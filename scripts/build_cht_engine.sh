@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 全新編 ScummVM + 套最後聖戰繁中 patch(INDY3 FM-Towns CJK)。不沿用任何既有 binary。
+# 全新編 ScummVM + 套聖戰奇兵繁中 patch(INDY3 FM-Towns CJK)。不沿用任何既有 binary。
 # 產物:build-engine/sv/scummvm
 set -e
 cd "$(dirname "$0")/.."

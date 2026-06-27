@@ -1,4 +1,4 @@
-# 印第安納·瓊斯:最後聖戰 中文化(Indiana Jones and the Last Crusade, FM-Towns)
+# 印第安納·瓊斯:聖戰奇兵 中文化(Indiana Jones and the Last Crusade, FM-Towns)
 
 > 前作經驗來自姊妹專案 **亞特蘭提斯之謎**(`@~/indian_jones/atlantis`)——同一套「patched-ScummVM engine-overlay」漢化法。
 > **但這作是 SCUMM v3 / FM-Towns / 無語音,跟 FOA(v5 talkie)差很多,不要照抄,照下面的差異表走。**
@@ -14,7 +14,7 @@
 
 ## 與 FOA(亞特蘭提斯)的關鍵差異(★必讀,別照抄★)
 
-| 面向 | FOA(v5,做過了) | 最後聖戰(v3 / FM-Towns,這作) |
+| 面向 | FOA(v5,做過了) | 聖戰奇兵(v3 / FM-Towns,這作) |
 |---|---|---|
 | **SCUMM 版本** | v5,資源在 `ATLANTIS.001`(LECF/XOR 0x69 容器) | **v3,資源在 `NN.LFL`** 檔(不同編碼/格式)→ **FOA 的 `tools/scumm_v5.py` 不能用**,要寫 v3 LFL 抽字 |
 | **抽字** | 走完 LECF 樹解 SCRP/LSCR | **scummtr** export/import `*.LFL`(zak-cht 已驗證,不用自寫 v3 parser) |
@@ -24,7 +24,7 @@
 | **CD 音樂** | 無 | **有 Red Book 8 軌**,ScummVM 自己放,**別動** |
 | **劇情** | 柏拉圖/亞特蘭提斯/蘇菲亞 | 電影正傳:亨利老瓊斯、聖杯、「他選錯了」、拳擊戰、飛船、城堡 |
 
-> **★ 最關鍵的成功前例:`~/zak-cht`(Zak McKracken FM-Towns 繁中化,已完成可玩)。** 跟最後聖戰**同類**(SCUMM v3 + FM-Towns + LFL + scummtr)。**動手前先讀它的 `patches/`、`tools/`、`README.md`、`docs/`,逐項照抄 proven 作法**(rule 42 參考保真度)。對應 skill `zak-fmtowns-zhtw` 是它的摘要;**真實作法以 `~/zak-cht` repo 為準**。
+> **★ 最關鍵的成功前例:`~/zak-cht`(Zak McKracken FM-Towns 繁中化,已完成可玩)。** 跟聖戰奇兵**同類**(SCUMM v3 + FM-Towns + LFL + scummtr)。**動手前先讀它的 `patches/`、`tools/`、`README.md`、`docs/`,逐項照抄 proven 作法**(rule 42 參考保真度)。對應 skill `zak-fmtowns-zhtw` 是它的摘要;**真實作法以 `~/zak-cht` repo 為準**。
 
 ## 沿用 FOA 的要點(這些直接搬)
 

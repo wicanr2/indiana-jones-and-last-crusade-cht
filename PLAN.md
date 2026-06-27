@@ -1,4 +1,4 @@
-# PLAN — 最後聖戰 繁中化分階段規劃
+# PLAN — 聖戰奇兵 繁中化分階段規劃
 
 承前作亞特蘭提斯的節奏,但按 v3 / FM-Towns / 無語音調整。每階段先建可驗證的成功標準再動手。
 
@@ -40,7 +40,7 @@
 
 > **決定:做。** 字幕為主、配音為加值;由本專案自製 TTS(edge-tts 分角色)。**不是 FOA 那種重導,是無中生有。**
 
-**已驗證(別再重查):最後聖戰 FM-Towns 版沒有任何原始語音。** CD 掃描無 `MONSTER.SOU` / `.VOC` / `SPEECH` / `VOICE` 等語音資源;音訊只有 TOWNS SOUND LIBRARY(Joe Mizuno 1989)的 PCM 音效 + Red Book CD 音樂。ScummVM 的 INDY3 路徑也沒有 speech/talkie 旗標。對白是純文字。所以**沒有語音點可重導**,只能新增一套語音子系統。
+**已驗證(別再重查):聖戰奇兵 FM-Towns 版沒有任何原始語音。** CD 掃描無 `MONSTER.SOU` / `.VOC` / `SPEECH` / `VOICE` 等語音資源;音訊只有 TOWNS SOUND LIBRARY(Joe Mizuno 1989)的 PCM 音效 + Red Book CD 音樂。ScummVM 的 INDY3 路徑也沒有 speech/talkie 旗標。對白是純文字。所以**沒有語音點可重導**,只能新增一套語音子系統。
 
 **作法(積木都在:本來就攔截對白顯示路徑來畫中文字幕):**
 1. **觸發**:在攔截對白的同一個 hook,按「行 ID(對白內容 hash,翻譯表本來就用這 key)」找對應中文 VOC。

@@ -14,7 +14,7 @@ SRC=game/extracted/INDY3ENG
 [ -d "$SRC" ] || { echo "缺英文 LFL:$SRC(先 bchunk 拆 CD 資料軌)"; exit 1; }
 [ -x "$SCUMMTR" ] || { echo "缺 patched scummtr:$SCUMMTR"; exit 1; }
 
-OUT=build-engine/game-cht
+OUT="${OUT:-build-engine/game-cht}"
 rm -rf "$OUT"; mkdir -p "$OUT"
 cp "$SRC"/*.LFL "$OUT/"
 cp "$FONT" "$OUT/"

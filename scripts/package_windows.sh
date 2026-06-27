@@ -23,7 +23,7 @@ printf '@echo off\r\nscummvm.exe -p game --platform=fmtowns --language=cn %%* in
 # 使用說明.txt(繁中,CRLF)
 {
 cat <<'TXT'
-印第安納瓊斯:最後聖戰  繁體中文版(Windows x64)
+印第安納瓊斯:聖戰奇兵  繁體中文版(Windows x64)
 ==================================================
 
 這是什麼

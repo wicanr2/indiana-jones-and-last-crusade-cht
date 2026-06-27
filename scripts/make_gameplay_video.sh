@@ -24,7 +24,7 @@ kenburns(){ local FO; FO=$(awk "BEGIN{print $3-0.5}")
     -c:v libx264 -pix_fmt yuv420p "$2"; }
 
 echo "== 烘卡片/投影片 =="
-card  "$TMP/00.png" '印第安納·瓊斯:最後聖戰' '繁體中文化　LucasArts 1989　ScummVM(FM-Towns)'
+card  "$TMP/00.png" '印第安納·瓊斯:聖戰奇兵' '繁體中文化　LucasArts 1989　ScummVM(FM-Towns)'
 slide "$TMP/02.png" crusade_cht_title.png  '連標題的版權行都說起了中文'
 slide "$TMP/03.png" crusade_cht_intro.png  '中文場景字幕　巴奈特學院,紐約,1938 年'
 slide "$TMP/04.png" crusade_cht_verbs.png  '底部那排動詞　全變中文了'

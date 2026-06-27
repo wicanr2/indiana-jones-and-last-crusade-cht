@@ -9,7 +9,7 @@ GAME="${GAME:-build-engine/game-cht}"
 [ -d "$SRC/Contents/MacOS" ] || { echo "不是 .app: $SRC"; exit 1; }
 
 PKG="dist-all/macos/IndyCrusade-CHT-mac-full"
-OUT="$PKG/印第安納瓊斯-最後聖戰(繁中).app"
+OUT="$PKG/印第安納瓊斯-聖戰奇兵(繁中).app"
 rm -rf "$PKG"; mkdir -p "$PKG"
 cp -a "$SRC" "$OUT"
 D="$OUT/Contents/Resources/game"
@@ -23,7 +23,7 @@ cp "$GAME"/crusade_title.spr "$D/" 2>/dev/null || true   # 火車車廂標題中
 cp "$GAME"/track*.wav "$D/" 2>/dev/null || true
 
 cat > "$PKG/使用說明.txt" <<'TXT'
-印第安納瓊斯：最後聖戰  繁體中文版（macOS）
+印第安納瓊斯：聖戰奇兵  繁體中文版（macOS）
 ============================================
 
 這是什麼
@@ -40,12 +40,12 @@ LucasArts 1989 年經典冒險遊戲《Indiana Jones and the Last Crusade》
 這個 app 沒有經過 Apple 簽章，macOS 預設會擋下來。請二選一：
 
   做法 A（最簡單，建議）— 對 app 按右鍵
-    1. 在 Finder 對「印第安納瓊斯-最後聖戰(繁中).app」按右鍵 →「打開」。
+    1. 在 Finder 對「印第安納瓊斯-聖戰奇兵(繁中).app」按右鍵 →「打開」。
     2. 跳出警告時，再按一次「打開」。之後雙擊就能直接玩。
 
   做法 B — 終端機解除隔離
     打開「終端機」，貼上（路徑換成你放的位置）後按 Enter：
-        xattr -dr com.apple.quarantine "印第安納瓊斯-最後聖戰(繁中).app"
+        xattr -dr com.apple.quarantine "印第安納瓊斯-聖戰奇兵(繁中).app"
     然後雙擊 app 即可。
 
 如果出現「已損毀，無法打開」

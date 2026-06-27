@@ -1,7 +1,7 @@
-# previous-work — 工作狀態交接(印第安納瓊斯:最後聖戰 繁中化)
+# previous-work — 工作狀態交接(印第安納瓊斯:聖戰奇兵 繁中化)
 
 > 給接手的 Claude Code 兄弟:先讀這份,再 `claude --resume`(UUID 在最下方 §接續)。
-> ⚠️ 這個 session 同時做兩個專案:**atlantis**(亞特蘭提斯,主 cwd)與 **crusade**(最後聖戰,本專案)。
+> ⚠️ 這個 session 同時做兩個專案:**atlantis**(亞特蘭提斯,主 cwd)與 **crusade**(聖戰奇兵,本專案)。
 > session jsonl + memory 在 `-home-anr2-indian-jones-atlantis` 目錄底下(兩專案共用同一段對話)。
 
 ## 專案現況快照

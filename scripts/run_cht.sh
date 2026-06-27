@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 跑中文最後聖戰。關鍵旗標:--platform=fmtowns(避免 auto-detect 選錯 VGA/DOS 變體 → Bad ID)、
+# 跑中文聖戰奇兵。關鍵旗標:--platform=fmtowns(避免 auto-detect 選錯 VGA/DOS 變體 → Bad ID)、
 # --language=cn(ZH_CHN,觸發 chinese_gb16x12.fnt 路徑 + _useCJKMode)。
 # headless 截圖:HEADLESS=1 scripts/run_cht.sh
 set -u

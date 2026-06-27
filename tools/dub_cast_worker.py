@@ -14,7 +14,7 @@ for tsv in sorted(glob.glob(f"{CAST}/a*.tsv")):
         mp3 = os.path.join(outdir, key + ".mp3"); voc = os.path.join(outdir, key + ".voc")
         if os.path.exists(voc): continue
         jobs.append((cn, voice, rate, pitch, mp3))
-sem = asyncio.Semaphore(2)
+sem = asyncio.Semaphore(4)
 async def one(cn, voice, rate, pitch, mp3):
     async with sem:
         try: await edge_tts.Communicate(cn, voice, rate=rate, pitch=pitch).save(mp3)

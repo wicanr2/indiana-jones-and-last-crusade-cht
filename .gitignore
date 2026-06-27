@@ -27,3 +27,8 @@ translations/todo_en.txt
 translations/scummtr_zh.txt
 translations/zh.tsv
 build-engine/
+
+# 版權素材原始掃描(只 commit screenshots/ 的縮圖引用)
+software_front/
+design_title/
+voice_audition/

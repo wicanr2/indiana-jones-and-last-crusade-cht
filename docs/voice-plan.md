@@ -30,7 +30,7 @@
 
 ## C. 英文語音 — 設計(聲線借 atlantis)
 
-最後聖戰原版無語音 → 英文語音同樣是**自製 TTS**,念**英文原文**(`crusade_en.txt` 對應行)。
+聖戰奇兵原版無語音 → 英文語音同樣是**自製 TTS**,念**英文原文**(`crusade_en.txt` 對應行)。
 - key 仍由「顯示的中文字串」算(引擎只認顯示字串)→ `voice_en/<key>.voc` = 該行英文 TTS。
 - F 鍵 `_chtVoiceEn` 切中/英語音(比照 atlantis F9,字幕仍中文 → 中字英配,或 F8 切英字)。
 - **聲線借 FOA(atlantis)**:印第用成熟美音男聲(en-US-GuyNeural / en-US-DavisNeural,近 Doug Lee 味);NPC 分聲線同 B 的 actor 機制(`voice_en/a<actor>/`)。
