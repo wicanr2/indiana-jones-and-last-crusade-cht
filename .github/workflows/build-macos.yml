@@ -1,0 +1,102 @@
+name: build-macos
+
+# macOS 只能在 macOS 上編 → GitHub Action。產出 universal(arm64 + x86_64).app:
+#   build (macos-14 arm64 / macos-15-intel x86_64):各弧自編 SDL2 → native 單弧編 scummvm
+#   bundle (macos-14):lipo 合成 universal → 組 .app artifact(只含引擎,中文遊戲/語音本機折入)
+# 抓回本機後用 scripts/package_macos_local.sh 折入 LFL + 字型 + 中文語音 → dist-all。
+# 移植自 atlantis;差異:patch=scumm-cht-indy3、pin base、啟動 --platform=fmtowns --language=cn indy3。
+#
+# 分弧原因:單次 -arch x86_64 -arch arm64 會把 min-version 餵進 ScummVM configure 版本解析 → 炸
+# "integer expression expected";每弧 native 乾淨 configure,最後 lipo。Intel 用 macos-15-intel(13 已退役)。
+# SDL2 一律自編(brew 的 sdl2 會變 sdl2-compat → 黑畫面)。壓縮音訊全關(中文語音是 raw VOC)。
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ['v*']
+
+env:
+  SCUMMVM_REF: fb1c2af1af154dfde7bd8be4fac92b7d5befbe8a
+  SDL2_VER: '2.30.9'
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: arm64
+            runner: macos-14
+          - arch: x86_64
+            runner: macos-15-intel
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: build tools (no SDL2 from brew)
+        run: brew install nasm pkg-config || true
+      - name: self-build SDL2 (native ${{ matrix.arch }}, static)
+        run: |
+          curl -L "https://github.com/libsdl-org/SDL/releases/download/release-${SDL2_VER}/SDL2-${SDL2_VER}.tar.gz" | tar xz
+          cd "SDL2-${SDL2_VER}"
+          ./configure --prefix="$GITHUB_WORKSPACE/sdl2" --disable-shared --enable-static
+          make -j"$(sysctl -n hw.ncpu)" && make install
+      - name: scummvm clone (pin) + patch
+        run: |
+          git clone --depth 1 https://github.com/scummvm/scummvm.git sv
+          cd sv
+          if [ "$(git rev-parse HEAD)" != "$SCUMMVM_REF" ]; then
+            git fetch --depth 1 origin "$SCUMMVM_REF" && git checkout "$SCUMMVM_REF"
+          fi
+          git apply "$GITHUB_WORKSPACE/patches/scumm-cht-indy3.patch" || patch -p1 < "$GITHUB_WORKSPACE/patches/scumm-cht-indy3.patch"
+      - name: configure + build (native ${{ matrix.arch }}, scumm only, self SDL2)
+        run: |
+          cd sv
+          PATH="$GITHUB_WORKSPACE/sdl2/bin:$PATH" \
+          ./configure --disable-all-engines --enable-engine=scumm \
+            --with-sdl-prefix="$GITHUB_WORKSPACE/sdl2" --enable-release \
+            --disable-mad --disable-vorbis --disable-flac --disable-fluidsynth --disable-tremor \
+            --disable-faad --disable-mpeg2 --disable-a52 --disable-theoradec --disable-vpx \
+            --disable-png --disable-jpeg --disable-gif --disable-freetype2 --disable-libcurl
+          make -j"$(sysctl -n hw.ncpu)"
+          file scummvm
+      - uses: actions/upload-artifact@v4
+        with:
+          name: scummvm-${{ matrix.arch }}
+          path: sv/scummvm
+
+  bundle:
+    needs: build
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: scummvm-arm64, path: bin-arm64 }
+      - uses: actions/download-artifact@v4
+        with: { name: scummvm-x86_64, path: bin-x86_64 }
+      - name: lipo -> universal + stage .app
+        run: |
+          chmod +x bin-arm64/scummvm bin-x86_64/scummvm
+          lipo -create bin-arm64/scummvm bin-x86_64/scummvm -output scummvm
+          lipo -info scummvm   # 應印 "x86_64 arm64"
+          A="dist/IndyCrusade-CHT.app/Contents"
+          mkdir -p "$A/MacOS" "$A/Resources/game"
+          cp scummvm "$A/MacOS/scummvm"
+          # 中文遊戲(LFL+字型+語音)由本機 package_macos_local.sh 折入 Resources/game;此處先留空。
+          # FM-Towns + ZH_CHN;indy3 必須最後
+          printf '#!/bin/sh\ncd "$(dirname "$0")"\nexec ./scummvm -p ../Resources/game --platform=fmtowns --language=cn "$@" indy3\n' > "$A/MacOS/launch.sh"
+          chmod +x "$A/MacOS/launch.sh" "$A/MacOS/scummvm"
+          cat > "$A/Info.plist" <<'PLIST'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0"><dict>
+            <key>CFBundleExecutable</key><string>launch.sh</string>
+            <key>CFBundleIdentifier</key><string>tw.wicanr2.indycrusade.cht</string>
+            <key>CFBundleName</key><string>Indy Crusade CHT</string>
+            <key>CFBundlePackageType</key><string>APPL</string>
+            <key>LSMinimumSystemVersion</key><string>11.0</string>
+          </dict></plist>
+          PLIST
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-engine-app
+          path: dist/IndyCrusade-CHT.app
