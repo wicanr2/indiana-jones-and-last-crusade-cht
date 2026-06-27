@@ -7,8 +7,10 @@
 - ✅ **階段 1 取資料**:bchunk 拆 FM-Towns CD `.bin/.cue` → 資料軌 `INDY3ENG/*.LFL`(90 檔)。
 - ✅ **階段 2 抽字**:`scummtr -g indy3towns -rwh -o`(預編 scummtr 0.5.1)→ 2172 行、1859 個唯一字串。
 - ✅ **階段 6 翻譯**:**1859/1859 唯一字串全翻完**(印第口吻+黑色幽默;羅馬數字/JEHOVA 拼字謎/聖杯描述等謎題精確保留;人名/控制碼/地板字母格/德語梗刻意留原樣)。管線:`tools/assemble_scummtr.py`(英文源+`zh.tsv` en→zh → 組裝 import-ready scummtr.txt;untranslated 自動留原文)。中文-only by-ID:`translations/crusade_zh_by_id.tsv`。
-- ⏳ **下一步**:階段 3-5 繪字路徑(套 `~/zak-cht/patches/scummvm-zhtw.patch` 擴 `GID_INDY3`)+ 字型(`chinese_gb16x12.fnt`)+ encode-gbk + scummtr 匯入 → 跑出中文畫面;再 階段 7 配音、階段 8 打包。
-- ⚠️ 版權:英文原劇本(`crusade_en.txt`/`zh.tsv`)gitignore 不入庫;只提交中文-only by-ID + 工具。
+- ✅ **階段 3-5 引擎整合(中文已在 ScummVM 顯示!)**:全新編 ScummVM(`scripts/build_cht_engine.sh`)+ 套 `patches/scumm-cht-indy3.patch`(zak ZH-CJK + INDY3 適配);字型重用 `chinese_gb16x12.fnt`(12×12 GBK);patched scummtr(zak scummtr-cjk + 本專案 `_checkRsc` CJK 修正)`encode-gbk` + 匯入(`scripts/import_cht.sh`)。**動詞面板、物件名、句子列全中文正常渲染**(截圖 `screenshots/crusade_cht_verbs.png`、`crusade_cht_look.png`)。
+  - 關鍵修正:① ScummVM HEAD 的 `case ZH_CHN` 對 INDY3 載 numChar=**8178**(GB2312),但字型是 **23940**(full GBK)→ 把 INDY3 從 8178 分支移到 23940 分支。② scummtr `_checkRsc` 把物件名結尾的 GBK trail byte `0xFE`(如「件」)誤判 truncated → 改 CJK-aware。③ 跑時 `--platform=fmtowns --language=cn`(否則 auto-detect 選錯 VGA 變體 → Bad ID）。
+- ⏳ **下一步**:階段 7 中文 TTS 配音(沿用 FOA dub pipeline)、階段 8 三平台打包(`retro-game-cht-package` skill)。
+- ⚠️ 版權:英文原劇本(`crusade_en.txt`/`zh.tsv`)+ 遊戲 LFL gitignore 不入庫;只提交 patch / 工具 / 中文-only by-ID / 截圖。
 
 ## 已完成(偵察)
 

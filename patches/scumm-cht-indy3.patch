@@ -1,0 +1,260 @@
+diff --git a/engines/scumm/charset.cpp b/engines/scumm/charset.cpp
+index 81c14ae2..17fb8b87 100644
+--- a/engines/scumm/charset.cpp
++++ b/engines/scumm/charset.cpp
+@@ -121,11 +121,16 @@ void ScummEngine::loadCJKFont() {
+ 			numChar = 13630;
+ 			break;
+ 		case Common::ZH_CHN:
+-			if (_game.id == GID_FT || _game.id == GID_LOOM || _game.id == GID_INDY3 ||
++			if (_game.id == GID_FT || _game.id == GID_LOOM ||
+ 				_game.id == GID_INDY4 || _game.id == GID_MONKEY || _game.id == GID_MONKEY2 ||
+ 				_game.id == GID_TENTACLE) {
+ 				fontFile = "chinese_gb16x12.fnt";
+ 				numChar = 8178;
++			} else if ((_game.id == GID_ZAK || _game.id == GID_INDY3)) {
++				// ZAK: use full GBK range (lead 0x81-0xFE, trail 0x40-0xFE except 0x7F)
++				// to cover traditional Chinese chars in GBK extension region.
++				fontFile = "chinese_gb16x12.fnt";
++				numChar = 23940;
+ 			}
+ 			break;
+ 		default:
+@@ -237,7 +242,10 @@ void ScummEngine::loadKorFont() {
+ }
+ 
+ byte *ScummEngine::get2byteCharPtr(int idx) {
+-	if (!isScummvmKorTarget() && (_game.platform == Common::kPlatformFMTowns || _game.platform == Common::kPlatformPCEngine))
++	// ZH_CHN/ZH_TWN on FMTowns falls through to _2byteFontPtr (chinese_gb16x12.fnt),
++	// originally this returned nullptr for FMTowns because Japanese used _cjkFont (FontSJIS ROM).
++	if (!isScummvmKorTarget() && (_game.platform == Common::kPlatformFMTowns || _game.platform == Common::kPlatformPCEngine)
++	    && _language != Common::ZH_CHN && _language != Common::ZH_TWN)
+ 		return nullptr;
+ 
+ 	switch (_language) {
+@@ -300,9 +308,32 @@ byte *ScummEngine::get2byteCharPtr(int idx) {
+ 
+ 			return _2byteFontPtr + base;
+ 		}
+-	case Common::ZH_CHN:
+-		idx = ((idx % 256) - 0xa1)* 94  + ((idx / 256) - 0xa1);
++	case Common::ZH_CHN: {
++		int trail = idx / 256;
++		int lead = idx % 256;
++		// ZAK 用 GBK 全 range (0x81-0xFE × 0x40-0xFE 跳 0x7F)，cover 繁中擴展字。
++		// 其他遊戲 (GID_FT/MONKEY/INDY 等) 用 GB2312 區位碼 (lead 0xa1-0xfe × trail 0xa1-0xfe)。
++		if ((_game.id == GID_ZAK || _game.id == GID_INDY3)) {
++			if (lead < 0x81 || lead > 0xFE || trail < 0x40 || trail > 0xFE || trail == 0x7F) {
++				idx = 0;
++			} else {
++				int t_off = (trail < 0x7F) ? (trail - 0x40) : (trail - 0x41);
++				idx = (lead - 0x81) * 190 + t_off;
++				if (idx >= 23940)
++					idx = 0;
++			}
++		} else {
++			// GB2312 區位碼 (原本邏輯)
++			if (lead < 0xa1 || lead > 0xfe || trail < 0xa1 || trail > 0xfe) {
++				idx = 0;
++			} else {
++				idx = (lead - 0xa1) * 94 + (trail - 0xa1);
++				if (idx >= 8178)
++					idx = 0;
++			}
++		}
+ 		break;
++	}
+ 	default:
+ 		idx = 0;
+ 	}
+@@ -671,6 +702,12 @@ void CharsetRenderer::addLinebreaks(int a, byte *str, int pos, int maxwidth) {
+ 						lastKoreanLineBreak = pos - 1;
+ 				}
+ 			}
++
++			// CJK byte-level line break for ZH_CHN / ZH_TWN: every CJK char is a valid break point.
++			// (Chinese has no space separators, original logic only breaks at spaces → infinite line.)
++			if ((_vm->_language == Common::ZH_CHN || _vm->_language == Common::ZH_TWN) && (chr & 0x80)) {
++				lastspace = pos - 2;  // record this CJK char's position as break candidate
++			}
+ 		} else {
+ 			curw += getCharWidth(chr);
+ 		}
+@@ -680,7 +717,21 @@ void CharsetRenderer::addLinebreaks(int a, byte *str, int pos, int maxwidth) {
+ 			}
+ 		}
+ 		if (curw > maxwidth) {
+-			if (!_vm->isScummvmKorTarget()) {
++			if ((_vm->_language == Common::ZH_CHN || _vm->_language == Common::ZH_TWN)
++			    && _vm->_useCJKMode && _vm->_game.version <= 3) {
++				// ZH-CJK: 把 wrap 點變成 \255\003 (end-of-message + 等 click 繼續)，
++				// 而非 0x0D newline (會把第 2 行頂進 main virtscreen 被覆蓋)。
++				// 需插入 2 bytes (0xFF, 0x03)，把 lastspace 後面的內容 memmove 右移 2 位。
++				byte *breakPtr = str + lastspace;
++				int tail = strLength - lastspace + 1;  // +1 含 NUL
++				memmove(breakPtr + 2, breakPtr, tail);
++				str[lastspace] = 0xFF;
++				str[lastspace + 1] = 0x03;
++				strLength += 2;
++				curw = 1;
++				pos = lastspace + 2;
++				lastspace = -1;
++			} else if (!_vm->isScummvmKorTarget()) {
+ 				str[lastspace] = 0xD;
+ 				curw = 1;
+ 				pos = lastspace + 1;
+@@ -856,10 +907,16 @@ void CharsetRendererPC::drawBits1Kor(Graphics::Surface &dest, int x1, int y1, co
+ }
+ 
+ int CharsetRendererV3::getDrawWidthIntern(uint16 chr) {
++	// CJK chr (>= 256) uses _2byteWidth (12 for ZH_CHN), not 8x8 ASCII.
++	if (chr >= 256 && _vm->_useCJKMode)
++		return _vm->_2byteWidth;
+ 	return getCharWidth(chr);
+ }
+ 
+-int CharsetRendererV3::getDrawHeightIntern(uint16) {
++int CharsetRendererV3::getDrawHeightIntern(uint16 chr) {
++	// CJK chr (>= 256) uses _2byteHeight (12 for ZH_CHN), not 8 for ASCII.
++	if (chr >= 256 && _vm->_useCJKMode)
++		return _vm->_2byteHeight;
+ 	return 8;
+ }
+ 
+@@ -1461,6 +1518,11 @@ int CharsetRendererTownsV3::getFontHeight() const {
+ 		return CharsetRendererV3::getFontHeight();
+ 	}
+ 
++	// ZH-CJK: 中文字 12px 高，原本回 8 會造成 string.cpp _top += 8 → 上下行重疊。
++	// 給 _2byteHeight + 1 行間距讓報紙標題/dialog wrap 正常。
++	if (_vm->_useCJKMode && (_vm->_language == Common::ZH_CHN || _vm->_language == Common::ZH_TWN))
++		return MAX<int>(_vm->_2byteHeight + 1, _fontHeight);
++
+ 	return _vm->_useCJKMode ? 8 : _fontHeight;
+ }
+ 
+@@ -1494,9 +1556,12 @@ void CharsetRendererTownsV3::drawBits1(Graphics::Surface &dest, int x, int y, co
+ #ifndef DISABLE_TOWNS_DUAL_LAYER_MODE
+ #ifdef USE_RGB_COLOR
+ 	if (_sjisCurChar) {
+-		assert(_vm->_cjkFont);
+-		_vm->_cjkFont->drawChar(dest, _sjisCurChar, x, y, _color, _shadowColor);
+-		return;
++		// ZH_CHN/ZH_TWN: no FontSJIS ROM, fall through to normal bit-blit
++		// using src from get2byteCharPtr() (12x12 glyph from chinese_gb16x12.fnt).
++		if (_vm->_cjkFont) {
++			_vm->_cjkFont->drawChar(dest, _sjisCurChar, x, y, _color, _shadowColor);
++			return;
++		}
+ 	}
+ #endif
+ 	bool scale2x = (_vm->_textSurfaceMultiplier == 2 && !(_sjisCurChar >= 256 && _vm->_useCJKMode) && (&dest == &_vm->_textSurface || &dest == &_vm->_virtscr[kBannerVirtScreen]));
+@@ -1577,8 +1642,11 @@ int CharsetRendererTownsV3::getDrawWidthIntern(uint16 chr) {
+ 
+ #ifdef USE_RGB_COLOR
+ 	if (_vm->_useCJKMode && chr > 127) {
+-		assert(_vm->_cjkFont);
+-		return _vm->_cjkFont->getCharWidth(chr);
++		// ZH_CHN/ZH_TWN: _cjkFont is null (no FontSJIS ROM loaded),
++		// fall back to _2byteWidth from chinese_gb16x12.fnt path.
++		if (_vm->_cjkFont)
++			return _vm->_cjkFont->getCharWidth(chr);
++		return _vm->_2byteWidth;
+ 	}
+ #endif
+ 	return CharsetRendererV3::getDrawWidthIntern(chr);
+@@ -1591,8 +1659,10 @@ int CharsetRendererTownsV3::getDrawHeightIntern(uint16 chr) {
+ 
+ #ifdef USE_RGB_COLOR
+ 	if (_vm->_useCJKMode && chr > 127) {
+-		assert(_vm->_cjkFont);
+-		return _vm->_cjkFont->getFontHeight();
++		// ZH_CHN/ZH_TWN: see getDrawWidthIntern.
++		if (_vm->_cjkFont)
++			return _vm->_cjkFont->getFontHeight();
++		return _vm->_2byteHeight;
+ 	}
+ #endif
+ 	return CharsetRendererV3::getDrawHeightIntern(chr);
+diff --git a/engines/scumm/string.cpp b/engines/scumm/string.cpp
+index ebb998ec..511bd5a6 100644
+--- a/engines/scumm/string.cpp
++++ b/engines/scumm/string.cpp
+@@ -1484,7 +1484,11 @@ void ScummEngine::drawString(int a, const byte *msg, Common::TextToSpeechManager
+ 			default:
+ 				break;
+ 			}
+-		} else if ((c == 0xFF || (_game.version <= 6 && c == 0xFE)) && (_game.heversion <= 71)) {
++		} else if ((c == 0xFF || (_game.version <= 6 && c == 0xFE
++				/* ZH-CJK 模式下，0xFE 是 GB18030 lead byte，不可視為 SCUMM escape */
++				&& !(_useCJKMode &&
++				     (_language == Common::ZH_CHN || _language == Common::ZH_TWN))
++				)) && (_game.heversion <= 71)) {
+ 			c = buf[i++];
+ 			switch (c) {
+ 			case 9:
+@@ -1693,7 +1697,12 @@ int ScummEngine::convertMessageToString(const byte *msg, byte *dst, int dstSize)
+ 				num += (_game.version == 8) ? 4 : 2;
+ 			}
+ 		} else {
+-			if ((chr != '@') || (_game.version >= 7 && is2ByteCharacter(_language, lastChr)) ||
++			// ZH-CJK: GBK 字 trail byte 可能是 0x40 ('@')，例如「這」=0xDF40。
++			// 原本的 '@' strip 規則只在 V7+/JA_JPN 例外，這會把 ZH 的有效字砍掉造成全行錯位。
++			const bool zhCJKTrail = _useCJKMode
++			    && (_language == Common::ZH_CHN || _language == Common::ZH_TWN)
++			    && is2ByteCharacter(_language, lastChr);
++			if ((chr != '@') || zhCJKTrail || (_game.version >= 7 && is2ByteCharacter(_language, lastChr)) ||
+ 				(_language == Common::JA_JPN && checkSJISCode(lastChr))) {
+ 				*dst++ = chr;
+ 			}
+diff --git a/engines/scumm/verbs.cpp b/engines/scumm/verbs.cpp
+index 1637dd33..d41bec6a 100644
+--- a/engines/scumm/verbs.cpp
++++ b/engines/scumm/verbs.cpp
+@@ -1013,9 +1013,22 @@ int ScummEngine::findVerbAtPos(int x, int y) const {
+ 	VerbSlot *vs;
+ 	int i = _numVerbs - 1;
+ 
++	// ZH-CJK: drawVerb 把 verb 繪製位置從 row*8 重新對齊到 row*_2byteHeight，
++	// 但 curRect.top 仍是原始 8-aligned 值。hit-test 需要同步做這層換算，
++	// 否則滑鼠 hover 行會錯位。
++	const bool cjkAdjustRow = _useCJKMode && _2byteHeight > 8 && _game.version <= 3
++	    && (_language == Common::ZH_CHN || _language == Common::ZH_TWN);
++	const int verbTopline = cjkAdjustRow ? _virtscr[kVerbVirtScreen].topline : 0;
++
+ 	vs = &_verbs[i];
+ 	do {
+-		if (vs->curmode != 1 || !vs->verbid || vs->saveid || y < vs->curRect.top || y >= vs->curRect.bottom)
++		int hitTop = vs->curRect.top;
++		if (cjkAdjustRow) {
++			int rel = hitTop - verbTopline;
++			if (rel >= 0)
++				hitTop = verbTopline + (rel / 8) * _2byteHeight;
++		}
++		if (vs->curmode != 1 || !vs->verbid || vs->saveid || y < hitTop || y >= vs->curRect.bottom)
+ 			continue;
+ 		if (vs->center) {
+ 			if (x < -(vs->curRect.right - 2 * vs->curRect.left) || x >= vs->curRect.right)
+@@ -1143,7 +1156,21 @@ void ScummEngine::drawVerb(int verb, int mode, Common::TextToSpeechManager::Acti
+ 		const bool isRtl = _language == Common::HE_ISR && !vs->center;
+ 		_string[4].charset = vs->charset_nr;
+ 		_string[4].xpos = isRtl ? vs->origLeft : vs->curRect.left + pixelXOffset;
+-		_string[4].ypos = vs->curRect.top + pixelYOffset;
++		// ZH-CJK: verb 用 12px 中文字，原 game-script 預設 row spacing 8px 導致行擠。
++		// 把每行依 row index 加 padding (8 → 12 線性 scale)。
++		// curRect.top 保留原始 8-aligned 值供 findVerbAtPos 重新換算；
++		// 若 writeback 會造成 redraw 累積漂移。
++		int adjustedYpos = vs->curRect.top;
++		if (_useCJKMode && _2byteHeight > 8 && _game.version <= 3
++		    && (_language == Common::ZH_CHN || _language == Common::ZH_TWN)) {
++			int verbTopline = _virtscr[kVerbVirtScreen].topline;
++			int rel = adjustedYpos - verbTopline;
++			if (rel >= 0) {
++				int rowIdx = rel / 8;
++				adjustedYpos = verbTopline + rowIdx * _2byteHeight;
++			}
++		}
++		_string[4].ypos = adjustedYpos + pixelYOffset;
+ 		_string[4].right = _screenWidth - 1 + pixelXOffset;
+ 		_string[4].center = vs->center;
+ 

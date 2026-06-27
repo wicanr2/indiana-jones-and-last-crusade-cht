@@ -1,0 +1,9 @@
+--- a/src/ScummTr/text.cpp
++++ b/src/ScummTr/text.cpp
+@@ _checkRsc: CJK-tolerant
+ // 在 zak scummtr-cjk.patch 之上,額外修 _checkRsc:
+ // 0xFF 才是真 SCUMM resource function(3 trailing);0x81-0xFE 視為 GBK/Big5
+ // 雙位元組字 lead → 跳 1 個 trail。避免物件名結尾的 GBK trail byte 0xFE
+ // (如「件」=0xBC 0xFE)被誤判成 truncated function。
+ // 把 _checkRsc 內 "else if 0xFE → countdown=1" 改成
+ //   "else if (byte>=0x81 && byte<=0xFE) countdown=1"

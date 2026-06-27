@@ -4,7 +4,11 @@
 > 與姊妹作 [亞特蘭提斯之謎](https://github.com/wicanr2/indiana-jones-and-the-fate-of-atlantis-cht) 同一套
 > 「不改原版資料、改 ScummVM 在繪字處攔截 → 查表 → 點陣中文重畫」的 engine-overlay 手法。
 
-**狀態:剛起步(已偵察素材,尚未開工)。** 完整技術背景與起手式見 [`CLAUDE.md`](CLAUDE.md);分階段規劃見 [`PLAN.md`](PLAN.md)。
+**狀態:文本翻譯完成 + 引擎整合完成 —— 中文已在 ScummVM 正常顯示。** 動詞面板、物件名、句子列全中文(見下圖)。剩中文配音(加值)與三平台打包。完整技術背景見 [`CLAUDE.md`](CLAUDE.md);分階段規劃與關鍵修正見 [`PLAN.md`](PLAN.md)。
+
+![中文動詞面板](screenshots/crusade_cht_verbs.png)
+
+> 底部動詞:推 / 拉 / 給 · 開 / 關 / 看 · 走向 / 拿起 / 查看 · 使用 / 開啟 / 關閉 · 交談 / 旅行;句子列「走向 更衣室」。FM-Towns 版,GBK 12×12 點陣字,走 ScummVM `CharsetRendererV3` + `TownsV3` 中文路徑。
 
 ## 與前作（亞特蘭提斯）的關鍵不同
 
