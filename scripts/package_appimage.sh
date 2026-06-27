@@ -24,6 +24,7 @@ ldd "$SV" | awk '/=>/{print $3}' | grep -E '\.so' \
 cp "$GAME"/*.LFL "$APPDIR/game/"
 cp "$GAME"/chinese_gb16x12.fnt "$APPDIR/game/"
 if [ -d "$GAME/voice" ]; then mkdir -p "$APPDIR/game/voice"; cp "$GAME"/voice/*.voc "$APPDIR/game/voice/" 2>/dev/null || true; fi
+if [ -d "$GAME/voice_en" ]; then mkdir -p "$APPDIR/game/voice_en"; cp "$GAME"/voice_en/*.voc "$APPDIR/game/voice_en/" 2>/dev/null || true; fi
 cp "$GAME"/track*.wav "$APPDIR/game/" 2>/dev/null || true
 
 cat > "$APPDIR/AppRun" <<'RUN'

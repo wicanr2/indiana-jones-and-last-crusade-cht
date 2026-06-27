@@ -192,6 +192,27 @@ index 81c14ae2..17fb8b87 100644
  	}
  #endif
  	return CharsetRendererV3::getDrawHeightIntern(chr);
+diff --git a/engines/scumm/input.cpp b/engines/scumm/input.cpp
+index ecef09cf..fbd700a2 100644
+--- a/engines/scumm/input.cpp
++++ b/engines/scumm/input.cpp
+@@ -408,6 +408,16 @@ void ScummEngine::processInput() {
+ 	Common::KeyState lastKeyHit = _keyPressed;
+ 	_keyPressed.reset();
+ 
++	// CHT: F9 toggles between the Chinese (voice/) and English (voice_en/) TTS dub.
++	if (lastKeyHit.keycode == Common::KEYCODE_F9 && _useCJKMode &&
++	    (_language == Common::ZH_CHN || _language == Common::ZH_TWN)) {
++		_chtVoiceEn = !_chtVoiceEn;
++		if (_sound)
++			_sound->stopTalkSound();
++		debug(1, "CHT voice -> %s", _chtVoiceEn ? "English" : "Chinese");
++		lastKeyHit.reset();
++	}
++
+ 	//
+ 	// Clip the mouse coordinates, and compute _virtualMouse.x (and clip it, too)
+ 	//
 diff --git a/engines/scumm/scumm.h b/engines/scumm/scumm.h
 index ae7b4bb7..017f37b7 100644
 --- a/engines/scumm/scumm.h
