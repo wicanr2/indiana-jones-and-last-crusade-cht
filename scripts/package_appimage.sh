@@ -23,6 +23,7 @@ ldd "$SV" | awk '/=>/{print $3}' | grep -E '\.so' \
 # 內嵌中文遊戲(LFL + 字型 + 中文語音 voice/*.voc + CD 音樂 track*.wav 若有)
 cp "$GAME"/*.LFL "$APPDIR/game/"
 cp "$GAME"/chinese_gb16x12.fnt "$APPDIR/game/"
+cp "$GAME"/crusade_title.spr "$APPDIR/game/" 2>/dev/null || true   # 火車車廂標題中文疊圖
 [ -d "$GAME/voice" ] && cp -r "$GAME/voice" "$APPDIR/game/" 2>/dev/null || true        # 含 npc/ a<N>/ 子目錄
 [ -d "$GAME/voice_en" ] && cp -r "$GAME/voice_en" "$APPDIR/game/" 2>/dev/null || true
 cp "$GAME"/track*.wav "$APPDIR/game/" 2>/dev/null || true

@@ -17,6 +17,7 @@ mkdir -p "$D"
 # 中文遊戲:LFL + 字型 + 中文語音樹(含 a<N>/ npc/、voice_en/)
 cp "$GAME"/*.LFL "$D/"
 cp "$GAME"/chinese_gb16x12.fnt "$D/"
+cp "$GAME"/crusade_title.spr "$D/" 2>/dev/null || true   # 火車車廂標題中文疊圖
 [ -d "$GAME/voice" ]    && cp -r "$GAME/voice"    "$D/" 2>/dev/null || true
 [ -d "$GAME/voice_en" ] && cp -r "$GAME/voice_en" "$D/" 2>/dev/null || true
 cp "$GAME"/track*.wav "$D/" 2>/dev/null || true

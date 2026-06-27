@@ -14,6 +14,7 @@ cp build-win/out/*.dll "$P/" 2>/dev/null || true        # libgcc_s_seh-1 / libst
 # 內含中文遊戲:LFL + 字型 + 中文語音樹(voice/ 含 a<N>/ npc/、voice_en/)+ CD 音樂(若有)
 cp "$GAME"/*.LFL "$P/game/"
 cp "$GAME"/chinese_gb16x12.fnt "$P/game/"
+cp "$GAME"/crusade_title.spr "$P/game/" 2>/dev/null || true   # 火車車廂標題中文疊圖
 [ -d "$GAME/voice" ]    && cp -r "$GAME/voice"    "$P/game/" 2>/dev/null || true
 [ -d "$GAME/voice_en" ] && cp -r "$GAME/voice_en" "$P/game/" 2>/dev/null || true
 cp "$GAME"/track*.wav "$P/game/" 2>/dev/null || true

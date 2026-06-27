@@ -192,6 +192,83 @@ index 81c14ae2..17fb8b87 100644
  	}
  #endif
  	return CharsetRendererV3::getDrawHeightIntern(chr);
+diff --git a/engines/scumm/gfx.cpp b/engines/scumm/gfx.cpp
+index bf85f13c..c66ff70a 100644
+--- a/engines/scumm/gfx.cpp
++++ b/engines/scumm/gfx.cpp
+@@ -548,6 +548,72 @@ void ScummEngine::drawDirtyScreenParts() {
+ 	} else {
+ 		updateDirtyScreen(kMainVirtScreen);
+ 	}
++
++	drawCrusadeTitle(); // INDY3 CHT title overlay (no-op outside the title room)
++}
++
++// INDY3 CHT: blit the designed Chinese title (印第安納·瓊斯 / 最後聖戰) onto the
++// train-car title screen. crusade_title.spr = [u16 x][u16 y][u16 w][u16 h] + RGBA px.
++// Opaque px colour-matched to the live palette (8-bit) or written as RGB (FM-Towns 16-bit).
++void ScummEngine::drawCrusadeTitle() {
++	if (_game.id != GID_INDY3 || _currentRoom != 79) // room 79 = 火車車廂標題(room 76 是 LucasFilm logo)
++		return;
++	static int loaded = -1;
++	static uint16 tx = 0, ty = 0, tw = 0, th = 0;
++	static byte *trgba = nullptr;
++	if (loaded < 0) {
++		loaded = 0;
++		ScummFile *f = instantiateScummFile(false);
++		if (f && openFile(*f, Common::Path("crusade_title.spr"))) {
++			tx = f->readUint16LE(); ty = f->readUint16LE();
++			tw = f->readUint16LE(); th = f->readUint16LE();
++			uint32 n = (uint32)tw * th * 4;
++			trgba = new byte[n];
++			f->read(trgba, n);
++			loaded = 1;
++		}
++		delete f;
++	}
++	if (loaded != 1)
++		return;
++
++	Graphics::Surface *screen = _system->lockScreen();
++	if (!screen) return;
++	const Graphics::PixelFormat &fmt = screen->format;
++	const byte *pal = _currentPalette;
++	uint32 cacheKey[64]; uint32 cacheVal[64]; int cacheN = 0;
++	for (uint16 py = 0; py < th && ty + py < (uint)screen->h; py++) {
++		const byte *src = trgba + (uint32)py * tw * 4;
++		for (uint16 px = 0; px < tw; px++, src += 4) {
++			if (tx + px >= (uint)screen->w)
++				break;
++			if (src[3] < 128)
++				continue;
++			uint32 key = ((uint32)src[0] << 16) | ((uint32)src[1] << 8) | src[2];
++			uint32 val = 0; bool got = false;
++			for (int c = 0; c < cacheN; c++)
++				if (cacheKey[c] == key) { val = cacheVal[c]; got = true; break; }
++			if (!got) {
++				if (fmt.bytesPerPixel == 1) {
++					int best = 0, bestd = 0x7fffffff;
++					for (int i = 0; i < 256; i++) {
++						int dr = src[0] - pal[i*3+0], dg = src[1] - pal[i*3+1], db = src[2] - pal[i*3+2];
++						int d = dr*dr + dg*dg + db*db;
++						if (d < bestd) { bestd = d; best = i; }
++					}
++					val = (uint32)best;
++				} else {
++					val = fmt.RGBToColor(src[0], src[1], src[2]);
++				}
++				if (cacheN < 64) { cacheKey[cacheN] = key; cacheVal[cacheN] = val; cacheN++; }
++			}
++			if (fmt.bytesPerPixel == 1)
++				*((byte *)screen->getBasePtr(tx + px, ty + py)) = (byte)val;
++			else if (fmt.bytesPerPixel == 2)
++				*((uint16 *)screen->getBasePtr(tx + px, ty + py)) = (uint16)val;
++		}
++	}
++	_system->unlockScreen();
+ }
+ 
+ void ScummEngine_v6::drawDirtyScreenParts() {
 diff --git a/engines/scumm/input.cpp b/engines/scumm/input.cpp
 index ecef09cf..fbd700a2 100644
 --- a/engines/scumm/input.cpp
@@ -214,7 +291,7 @@ index ecef09cf..fbd700a2 100644
  	// Clip the mouse coordinates, and compute _virtualMouse.x (and clip it, too)
  	//
 diff --git a/engines/scumm/scumm.h b/engines/scumm/scumm.h
-index ae7b4bb7..017f37b7 100644
+index ae7b4bb7..50794b55 100644
 --- a/engines/scumm/scumm.h
 +++ b/engines/scumm/scumm.h
 @@ -1338,6 +1338,7 @@ public:
@@ -225,6 +302,14 @@ index ae7b4bb7..017f37b7 100644
  	virtual void actorTalk(const byte *msg);
  	void stopTalk();
  	int getTalkingActor();		// Wrapper around VAR_TALK_ACTOR for V1 Maniac
+@@ -1499,6 +1500,7 @@ protected:
+ 	bool _enableSegaShadowMode = false;
+ 
+ 	virtual void drawDirtyScreenParts();
++	void drawCrusadeTitle(); // INDY3 CHT: 火車車廂標題疊中文片名(room 76)
+ 	void updateDirtyScreen(VirtScreenNumber slot);
+ 	void drawStripToScreen(VirtScreen *vs, int x, int width, int top, int bottom);
+ 
 diff --git a/engines/scumm/sound.cpp b/engines/scumm/sound.cpp
 index bfb33823..478ebc96 100644
 --- a/engines/scumm/sound.cpp
