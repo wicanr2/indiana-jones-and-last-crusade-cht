@@ -226,7 +226,7 @@ index ae7b4bb7..017f37b7 100644
  	void stopTalk();
  	int getTalkingActor();		// Wrapper around VAR_TALK_ACTOR for V1 Maniac
 diff --git a/engines/scumm/sound.cpp b/engines/scumm/sound.cpp
-index bfb33823..26c46048 100644
+index bfb33823..d61b21cf 100644
 --- a/engines/scumm/sound.cpp
 +++ b/engines/scumm/sound.cpp
 @@ -23,6 +23,7 @@
@@ -237,7 +237,7 @@ index bfb33823..26c46048 100644
  
  #include "scumm/actor.h"
  #include "scumm/file.h"
-@@ -125,6 +126,55 @@ void Sound::startSound(int sound, int offset, int channel, int flags, int freq,
+@@ -125,6 +126,68 @@ void Sound::startSound(int sound, int offset, int channel, int flags, int freq,
  	addSoundToQueue(sound, offset, channel, flags, freq, pan, volume);
  }
  
@@ -267,13 +267,26 @@ index bfb33823..26c46048 100644
 +	debug(3, "CHTMAP %d %08x", actor, (unsigned)h);
 +	// English-voice (F-toggle): voice_en/ holds the en-US dub; else voice/ (Chinese).
 +	const char *sub = _vm->_chtVoiceEn ? "voice_en" : "voice";
-+	// per-character override: voice[_en]/a<actor>/<key>.voc first, then the shared one.
++	// voice lookup order:
++	//   1. voice[_en]/a<actor>/<key>.voc   — per-character override (e.g. Elsa female voice)
++	//   2. voice[_en]/npc/<key>.voc         — shared steadier voice for any non-ego (NPC) line
++	//                                          (1940s characters speak more calmly than Indy)
++	//   3. voice[_en]/<key>.voc             — Indy / shared default
++	int ego = (_vm->VAR_EGO != 0xFF) ? _vm->VAR(_vm->VAR_EGO) : -1;
++	bool isNpc = (actor != ego && actor > 0 && actor < 0x80);
 +	ScummFile f(_vm);
 +	Common::String name = Common::String::format("%s/a%d/%08x.voc", sub, actor, (unsigned)h);
 +	if (!_vm->openFile(f, Common::Path(name))) {
-+		name = Common::String::format("%s/%08x.voc", sub, (unsigned)h);
-+		if (!_vm->openFile(f, Common::Path(name)))
-+			return;
++		bool opened = false;
++		if (isNpc) {
++			name = Common::String::format("%s/npc/%08x.voc", sub, (unsigned)h);
++			opened = _vm->openFile(f, Common::Path(name));
++		}
++		if (!opened) {
++			name = Common::String::format("%s/%08x.voc", sub, (unsigned)h);
++			if (!_vm->openFile(f, Common::Path(name)))
++				return;
++		}
 +	}
 +	uint32 sz = (uint32)f.size();
 +	if (!sz || sz > 8 * 1024 * 1024)
