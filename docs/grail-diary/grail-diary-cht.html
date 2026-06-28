@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<title>亨利·瓊斯的聖杯日記</title>
+<style>
+  :root{
+    --paper:#f4f0e6;
+    --ink:#1a1712;
+    --green:#1C6B2B;
+    --serif:"Noto Serif CJK TC","Source Han Serif TC",serif;
+    --kai:"AR PL UKai TW","AR PL UKai CN",serif;
+    --type:"Courier 10 Pitch","Liberation Mono","Noto Serif CJK TC",monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:#555;}
+  body{font-family:var(--serif);color:var(--ink);}
+
+  /* 一頁 = A5 直式 */
+  .page{
+    position:relative;
+    width:148mm;height:210mm;
+    margin:6mm auto;
+    background:var(--paper);
+    padding:16mm 13mm 14mm 13mm;
+    box-shadow:0 2px 12px rgba(0,0,0,.5);
+    overflow:hidden;
+    page-break-after:always;
+  }
+  /* 紙張底紋:極淡米黃老紙 */
+  .page::before{
+    content:"";position:absolute;inset:0;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(120,90,40,.05), transparent 60%),
+      radial-gradient(circle at 85% 90%, rgba(120,90,40,.06), transparent 55%);
+    pointer-events:none;
+  }
+
+  /* 跑馬頁眉 */
+  .rh{
+    position:absolute;top:10mm;left:13mm;right:13mm;
+    font-family:var(--serif);
+    font-size:7.2pt;letter-spacing:.32em;
+    color:#3a342b;
+    text-transform:uppercase;
+    border-bottom:1px solid #6a5f4d;
+    padding-bottom:2mm;
+    white-space:nowrap;
+  }
+  .pno{
+    position:absolute;bottom:7mm;left:0;right:0;
+    text-align:center;font-size:9pt;font-weight:bold;color:#2a251d;
+  }
+
+  .body{margin-top:5mm;}
+  .cols{column-count:2;column-gap:7mm;text-align:justify;}
+  .cols p,.body>p{
+    margin:0 0 0 0;text-indent:1.6em;
+    font-size:9.1pt;line-height:1.62;
+    -webkit-hyphens:auto;hyphens:auto;
+  }
+  .cols p+p{margin-top:.1em;}
+  .cols.dense{column-gap:6mm;}
+  .cols.dense p{font-size:8.3pt;line-height:1.46;}
+  .noindent{text-indent:0 !important;}
+
+  h1.maintitle{
+    font-size:21pt;font-weight:700;line-height:1.15;margin:2mm 0 6mm;
+    letter-spacing:.02em;
+  }
+  /* 日記條目的地點/日期抬頭 */
+  .entry{margin-top:1.1em;text-indent:0;}
+  .entry .place{text-indent:0;margin:0;font-size:9.1pt;line-height:1.5;}
+  .entry .date{text-indent:0;margin:0 0 .15em;font-size:9.1pt;line-height:1.5;}
+  .break-avoid{break-inside:avoid;}
+
+  /* 詩文殘篇 */
+  .verse{
+    text-indent:0;margin:.6em 0 .6em 1.2em;
+    font-style:italic;font-family:var(--serif);
+    font-size:9pt;line-height:1.7;color:#2a2419;
+  }
+  .verse .vline{display:block;text-indent:0;}
+  .verse .ind{padding-left:1.4em;}
+  .src{font-size:8.6pt;color:#4a4234;}
+  .latin{font-style:italic;letter-spacing:.02em;}
+  .smc{font-variant:small-caps;letter-spacing:.06em;}
+
+  u{text-decoration-thickness:.5px;text-underline-offset:2px;}
+
+  /* ===== 信件(打字機,置中框) ===== */
+  .letterpage{display:flex;align-items:center;justify-content:center;height:100%;}
+  .letter{
+    width:108mm;border:1px solid #2a251d;
+    padding:11mm 11mm;
+    font-family:var(--type);
+    font-size:8.7pt;line-height:1.78;color:#23201a;
+    background:rgba(255,255,255,.16);
+  }
+  .letter.center-head{text-align:center;}
+  .letter p{margin:0 0 .55em;text-indent:0;}
+  .letter .indent{text-indent:2.2em;}
+  .letter .rt{text-align:right;}
+  .letter .sp{height:.9em;}
+  .letter .hdr{font-weight:bold;letter-spacing:.05em;}
+  .letter .sig{font-family:var(--kai);font-size:12pt;}
+  .letter.script-head .head-block{font-family:var(--kai);text-align:center;font-size:12pt;line-height:1.5;margin-bottom:1.2em;}
+
+  /* ===== 報紙剪報 ===== */
+  .clip{border:0;}
+  .clip .headline{
+    font-family:var(--serif);font-weight:800;
+    font-size:16pt;line-height:1.12;margin:0 0 3mm;text-indent:0;
+    letter-spacing:.01em;
+  }
+  .clip .news{column-count:2;column-gap:6mm;text-align:justify;}
+  .clip .news p{font-size:8.5pt;line-height:1.5;text-indent:1.4em;margin:0;}
+  .clip .dateline{font-weight:bold;}
+  .clip-note{margin-top:7mm;text-indent:0;font-size:9pt;border-top:1px solid #6a5f4d;padding-top:3mm;}
+
+  /* ===== 電報 ===== */
+  .telegram{
+    border:1.4px solid #2a251d;margin-top:5mm;
+    font-family:var(--serif);background:rgba(255,255,255,.18);
+  }
+  .tg-top{display:flex;justify-content:space-between;font-size:6.4pt;padding:1.5mm 2mm 0;color:#3a342b;}
+  .tg-title{text-align:center;border-bottom:1px solid #2a251d;padding:1mm 0 1.5mm;}
+  .tg-office{font-size:13pt;font-weight:700;font-style:italic;letter-spacing:.02em;}
+  .tg-word{font-size:8pt;letter-spacing:.7em;padding-left:.7em;}
+  .tg-grid{display:grid;grid-template-columns:repeat(8,1fr);font-size:5.6pt;border-bottom:1px solid #2a251d;color:#3a342b;}
+  .tg-grid div{border-right:1px solid #9c8f76;padding:1mm .6mm;text-align:center;line-height:1.1;}
+  .tg-grid div:last-child{border-right:0;}
+  .tg-addr{font-family:var(--type);font-size:7.6pt;padding:2mm 3mm 0;letter-spacing:.04em;}
+  .tg-msg{font-family:var(--type);font-size:7.8pt;line-height:1.85;padding:2mm 3mm 3mm;letter-spacing:.02em;}
+  .tg-foot{font-size:5.6pt;color:#5a5040;border-top:1px solid #9c8f76;padding:1mm 3mm;font-style:italic;}
+
+  /* 插圖 */
+  figure.illu{margin:0 0 3mm;text-indent:0;break-inside:avoid;}
+  figure.illu img{width:100%;display:block;border:1px solid #2a251d;background:#fff;}
+  .inscr{font-family:var(--type);letter-spacing:.04em;}
+
+  /* ===== 封面 / 封底 ===== */
+  .cover,.back{
+    background:var(--green);color:#0d0d0d;padding:0;
+  }
+  .cover::before,.back::before{display:none;}
+  .cover .ctitle{
+    position:absolute;top:30%;left:0;right:0;text-align:center;
+    font-family:var(--serif);font-weight:700;
+    font-size:30pt;line-height:1.3;color:#111;
+    padding:0 8mm;
+  }
+  .cover .csub{
+    position:absolute;top:62%;left:0;right:0;text-align:center;
+    font-size:11pt;letter-spacing:.3em;color:#0d2a12;
+  }
+  .back .copy{
+    position:absolute;bottom:16mm;left:12mm;right:12mm;
+    font-size:7.6pt;line-height:1.65;color:#0c1f0d;text-align:left;
+  }
+  .back .copy em{font-style:italic;}
+
+  @media print{
+    html,body{background:#fff;}
+    .page{margin:0;box-shadow:none;}
+    @page{size:148mm 210mm;margin:0;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ 封面 ============ -->
+<section class="page cover">
+  <div class="ctitle">亨利·瓊斯的<br>聖杯日記</div>
+  <div class="csub">THE GRAIL DIARY</div>
+</section>
+
+<!-- ============ 第 1 頁 ============ -->
+<section class="page">
+  <div class="rh">Indiana Jones and the Last Crusade</div>
+  <div class="body">
+    <h1 class="maintitle">聖杯日記<br><span style="font-size:14pt;font-weight:400;">——亨利·瓊斯 著</span></h1>
+    <div class="cols dense">
+      <p class="noindent"><strong>紐約州紐黑文</strong><br>一八九八年四月三日</p>
+      <p>昨夜,我見了一個異象。當時我正在書房裡,為齊勒教授的本國文學研討課,替沃爾夫拉姆·馮·埃申巴赫的《帕齊瓦爾》作箋註。我啜著紅葡萄酒,案上擺著一只半滿的酒杯。我正讀到帕西法爾——那位聖潔的純真者——初次望見聖杯的那一段:</p>
+      <p class="verse noindent">「……一物,名曰聖杯,<br>世間一切至美,皆不能及。」</p>
+      <p>——就在這時,整個房間彷彿忽然亮了起來。起初我以為是煤氣管的火頭竄高;隨即想起,在瑪麗的堅持下,我們住的是裝了電燈的新式樓房。</p>
+      <p>發光的,竟是我那只酒杯——它放出的光,比十幾顆電燈泡還要熾亮。接著,就在我眼前(我並未飲酒過量),那只杯子自桌面升起,開始明滅閃動。前一刻它如滿月般皎潔,杯緣彷彿綴著一圈珍珠;眨眼間又化作鏽蝕的金屬,珍珠之處浮現出文字;再一瞬,它看來竟像是木頭所製。而房間裡充滿一個聲音,既如龍捲風般咆哮,又如戀人耳語般輕柔;那聲音說:「亨利·瓊斯,如同昔日的騎士追尋此寶,你亦當如是!」然後——整起事件前後不過十秒——房間復歸寂靜,我的酒杯,又只是一只尋常的酒杯。</p>
+      <p>我並非虔信之人,也素不相信「神蹟異兆」。然而,我無法否認親眼所見、親耳所聞。我心中再無疑問:我領受了一項召喚。我被遣上一場追尋。我,亨利·瓊斯,獲得了一個機會,去尋找那曠世之寶——自亞瑟王時代以來,人類精神所企慕的那件熠熠生輝之物——聖杯。</p>
+      <p>自今日起,我願以畢生、以家財、以全部的學術心力,去完成這項令人敬畏的使命。縱使窮盡一生,我也要尋得聖杯;而這本日記,將是這場追尋的記錄。</p>
+      <p>但願我配得上它!</p>
+
+      <p class="entry noindent" style="margin-top:1.2em;"><strong>麻薩諸塞州西部</strong><br>一九〇〇年八月二十四日</p>
+      <p>此刻我搭著「湖光快車」的臥鋪車廂,自全美中世紀學者協會年會返家。我急著回到妻子與襁褓中幼子的身邊。我再也不會那麼天真,去相信一紙證明你是某某學科博士的文憑,就等於自動賦予你尊嚴與敬重。</p>
+      <p>我在會上宣讀的論文,換來的是難堪、質疑與訕笑。同僚們眾口一辭,認定聖杯不過是個神話傳說;說我若去研究莊園地產的清冊、或黑死病對城市發展的影響,還更能造福學界——我想,若一個人甘願當個埋首故紙的學究、若他毫無想像力、毫無內在的熱火、毫無……異象,那些確是「值得」的題目。但我深感寬慰的是:當年施里曼動身去尋找特洛伊的廢墟時,同樣遭人嘲笑。<span class="latin">Toujours l'audace!</span>(永遠要有膽識!)</p>
+      <p>比同僚的懷疑更礙事的,是現存聖杯記載的稀少與彼此矛盾。它究竟長什麼樣子、甚至究竟是什麼,都毫無定論。最主要的傳說,當然是說它是一只酒杯——基督在最後晚餐所用、亞利馬太的約瑟在祂受難時用來承接其寶血的那只杯。然而 <span class="latin">grail</span>(或 <span class="latin">graal</span>)一詞,也可能指「一只闊口淺皿」——不是杯,而是缽。在某些記載中,它根本不是器皿,而是一塊石頭。事實上,沃爾夫拉姆便</p>
+    </div>
+  </div>
+  <div class="pno">1</div>
+</section>
+
+<!-- ============ 第 2 頁 ============ -->
+<section class="page">
+  <div class="rh" style="text-align:right;">LucasArts Classic Adventures</div>
+  <div class="body">
+    <div class="cols dense">
+      <p class="noindent">稱它為 <span class="latin">lapsit excellis</span>,意思或許是 <span class="latin">lapis ex coelis</span>(自天而降之石),又或許是 <span class="latin">lapis exilis</span>——即煉金術士口中那塊「無所不能」的「哲人石」。</p>
+      <p>克雷蒂安·德·特魯瓦(約十二世紀晚期)是最早使用「聖杯」一詞的作者。克雷蒂安筆下的聖杯「以純金打造,密鑲珍寶」;從它流瀉而出的光是如此純淨,以致「燭火之輝為之黯然」。</p>
+      <p>晚一個世代的沃爾夫拉姆·馮·埃申巴赫,則把它描述成一塊自天墜落、安放在一方綠絲綢上的石頭。沃爾夫拉姆堅稱,這個傳說是他從一位名叫基奧特(或居奧特)的吟遊詩人那兒聽來的;此人在西班牙的一部書中發現了它,書的作者是一名猶太占星家,以一種「異教之舌」(大概是阿拉伯文或希伯來文)寫成。</p>
+      <p>羅貝爾·德·博龍與其他十四世紀的作者並未給出明確描述,但他們顯然把它視為一只<u>杯</u>,而非缽。他們告訴我們,它曾在一場異象中向亞瑟王及其騎士顯現,覆著一方白色天鵝絨。它彷彿「自身發光」,散發出「一股怡人的芬芳」,並向眾人分賜食物。</p>
+      <p>一個世紀之後的湯瑪斯·馬洛禮爵士也談到這場異象,只是把那白布寫成天鵝絨而非絲綢。叫人惱火的是,馬洛禮同樣沒給任何描述;他只堅稱,加拉哈德爵士是在一張銀桌上、一只密鑲珍寶的匣中,尋得聖杯的。</p>
+      <p>何其矛盾!何其紛亂!正因為我所追尋之物的外貌竟如此撲朔,我決定把這本日記接下來的數頁,留作一份隨手可查的對照表,記下關於聖杯的各種描述與記載,好讓我能藉由相互比對,更準確地判斷它們的可信度。</p>
+
+      <p class="src noindent" style="margin-top:.9em;">於布列塔尼坎塔內茲修道院尋得之古愛爾蘭文殘篇,標記日期〇六年七月八日,據傳出自九世紀維京人劫掠艾奧納島後的一名倖存者之手。雖明顯帶有盎格魯—撒克遜的影響,然其羊皮紙、墨色與彩飾風格,皆似可佐證其真確。(亨利·瓊斯 譯):</p>
+      <p class="verse noindent break-avoid">他們的船如鯊魚,如撒旦的暗影,<br>
+      如行於水上的巨鯨,隆隆而來;<br>
+      他們飢渴的斧,以我們的血飽飲,<br>
+      在無盡的長夜裡,流淌成赤紅。<br>
+      他們把聖書投入火炬,<br>
+      將僧侶與經卷一同擲上烈焰,<br>
+      使道成的肉身,與道一同消亡……<br>
+      ……我主之聖杯,<br>
+      以和平之樹的木材雕成,<br>
+      置於銀盤之上,綠寶石的錦緞之間,<br>
+      由純潔的加爾豪特,捧入我等之屋,<br>
+      其時亞瑟在位,而美麗的羅格雷斯傾覆,<br>
+      他們把這至聖的聖物擄掠而去,<br>
+      帶往魔鬼為王的黑暗之地。</p>
+      <p class="src noindent" style="margin-top:.6em;">至於「我主之聖杯」究竟為何物,已無可疑!「和平之樹」似乎暗示它是橄欖木所製。那「銀製的<span class="latin"> salver</span>(盤)」與「祖母綠的<span class="latin"> samite</span>(絲緞)」,正與克雷蒂安等人所述的銀桌與綠布如出一轍。「羅格雷斯」即不列顛;而「加爾豪特」不是別人,正是加拉哈德爵士本人!</p>
+    </div>
+  </div>
+  <div class="pno">2</div>
+</section>
+
+<!-- ============ 第 3 頁:al-Jawf 信 ============ -->
+<section class="page">
+  <div class="rh">Indiana Jones and the Last Crusade</div>
+  <div class="letterpage">
+    <div class="letter">
+      <p class="hdr">穆罕默德·阿里·阿爾-焦夫<br>伊斯蘭博物館<br>伊拉克 巴格達</p>
+      <div class="sp"></div>
+      <p>一九〇九年十一月十四日</p>
+      <div class="sp"></div>
+      <p>敬啟者 瓊斯博士:</p>
+      <p class="indent">近日我在庫姆,有幸得閱一份努爾丁·阿爾-穆薩菲爾的波斯文手稿。此人是貴方曆法十二世紀的一位非凡人物,足跡遍及亞、非、歐三洲。稿中載有一段殘篇,為我所知的其他穆薩菲爾抄本所無。深知您對他所談論之物素有特殊興趣,我便冒昧為您譯出如下:</p>
+      <p class="indent">「在哥多華,我亦遇見一人,自稱曾親眼見過那只據說承接了先知爾撒〔耶穌〕一生之血的器皿:……一只白鑞淺缽,多處凹損,鏨刻著葡萄與葡萄葉的紋飾,還有猶太人文字的銘文。它包裹在一方金色絲綢之中;絲綢揭去之時,它彷彿自身發出光來。那人不肯說他是在阿拉的大地何處見到這奇景的;只說那地方,在他自一處綠洲南行、抵達一條河的源頭附近。」</p>
+      <p class="indent">願此事於您不僅是過眼之趣。</p>
+      <div class="sp"></div>
+      <p>願平安臨於您,</p>
+      <div class="sp"></div>
+      <p class="sig">阿爾-焦夫</p>
+    </div>
+  </div>
+  <div class="pno">3</div>
+</section>
+
+<!-- ============ 第 4 頁:Hawken 註 + 電報 ============ -->
+<section class="page">
+  <div class="rh" style="text-align:right;">LucasArts Classic Adventures</div>
+  <div class="body" style="width:62%;margin-left:auto;">
+    <p class="noindent">牛津的查爾斯·B·霍肯教授,談到他在威爾斯阿伯加文尼一帶的研究。他發現了八世紀初一名威爾斯山區基督教隱士所留日記的殘篇。這份日記照亮了黑暗時代不列顛人在虔信與宗教實踐上的若干面向。其中尤其引人注目的,是這位佚名編年者於西元七一七或七一九年所經歷的一場異象,所見正是亞瑟王傳說中的聖杯:「……那承接了上帝之血的卑微木杯,在亞瑟王的時代安放於阿瓦隆,鏨刻著神聖的符號,閃耀著恩典之光。」</p>
+    <p class="noindent" style="margin-top:.8em;"><strong>五·七·一五</strong>:剪自《凱爾特學人》春季號,內容是一場關於撒克遜人入侵後凱爾特—不列顛文學的研討會。這場歐戰一結束,我務必前往英國會一會霍肯。年輕的布洛迪一定認得他。</p>
+  </div>
+
+  <!-- 電報 -->
+  <div class="telegram">
+    <div class="tg-top"><span>緊急註記 Indicazioni d'urgenza</span><span>Circuito sul quale si deve fare l'inoltro del telegramma</span></div>
+    <div class="tg-title">
+      <span class="tg-office">Ufficio Telegrafico di ROMA</span>
+      <div class="tg-word">T E L E G R A M M A</div>
+    </div>
+    <div class="tg-grid">
+      <div>Qualifica</div><div>Destinazione</div><div>Provenienza</div><div>Numero</div><div>Parole</div><div>Data della presentazione<br>Giorno e mese · Ore e minuti</div><div>VIA d'istradamento</div><div>Indicazioni eventuali d'ufficio</div>
+    </div>
+    <div class="tg-addr">收件 亨利·瓊斯博士　四角落大學　科羅拉多州拉斯梅薩斯　美國　　　〔二·二一·一二〕</div>
+    <div class="tg-msg">
+      已取得熱那亞商人保羅之日記　十三世紀　句　內容講述其於中亞土耳其諸部族間之歷險　句　一部族人告以曾親見一巨大陶製飲杯　光如月華　句　所在隱秘　由一基督教騎士及致命防護機關守衛　句　保羅推測即聖杯　句　本人今春將訪美　句　屆時攜該日記供君查驗　句　四月將搭乘英國新郵輪鐵達尼號啟航　句　科里羅利
+    </div>
+    <div class="tg-foot">Il Governo Italiano e la Società Italcable non assumono alcuna responsabilità civile in conseguenza del servizio telegrafico e radioelettrico.</div>
+  </div>
+  <div class="pno">4</div>
+</section>
+
+<!-- ============ 第 5 頁 ============ -->
+<section class="page">
+  <div class="rh">Indiana Jones and the Last Crusade</div>
+  <div class="body">
+    <div class="cols">
+      <p class="src noindent">威爾斯文詩篇殘篇,據傳出自塔利埃辛,由一名牧人兼民俗學者在威爾斯莫赫德雷夫詠唱,亨利·瓊斯譯,一九二〇年七月三十一日:</p>
+      <p class="verse noindent">……<u>銀亮*</u>如海上的浪沫,<br>
+      <u>璀璨</u>如布朗溫的明鏡,<br>
+      芬芳如布蘿黛維的肌膚,<br>
+      雄渾如布蘭的利劍;<br>
+      以東方那隱晦之舌,<br>
+      <u>鏨刻著祝福的咒文</u>,<br>
+      此器,上帝的圓舟,<br>
+      以新逐舊,革故鼎新。</p>
+      <p class="src noindent"><strong>按</strong>:圓舟(coracle)是一種圓形的小船,至今仍為威爾斯與英格蘭西部的漁民所用;由此看來,塔利埃辛的詩句似乎支持「聖杯是缽而非杯」之說。</p>
+      <p class="src noindent" style="margin-top:.6em;">*當地威爾斯人告訴我,這個字更準確的譯法應是「泛沫的」「晶瑩的」或「熠熠生輝的」。無論如何,它描述的是一種外觀上的質地,不應被當成是指<u>金屬</u>的銀。</p>
+
+      <p class="src noindent" style="margin-top:1em;">賓根的女修道院長希爾德加德一場異象的記述,見於聖加侖本篤會修道院圖書館一份手稿,看來出自希爾德加德親筆。(亨利·瓊斯自拉丁文譯出並節錄,一九二〇年九月二日)</p>
+      <p class="noindent" style="font-size:9pt;">「在〔一一六三年的〕受難節,我於晨禱時分置身禮拜堂……忽然間,禮拜堂彷彿被一道比白晝更亮的光充滿,儘管堂外一片幽暗……聖靈降臨於我,賜我一場異象,見我主懸於十字架之上。……在祂身側站著亞利馬太的約瑟,手執一只黃銅聖杯,承接我們救主的血;杯上彷彿以<u>希臘文鏨著這幾個字:『爾等取此,這是我的血。』</u>……」</p>
+
+      <p class="src noindent" style="margin-top:1em;">基輔一名拜占庭商人日記之節錄,十世紀初,由科迪羅利翻譯並於一九二〇年九月二十九日示我:</p>
+      <p class="noindent" style="font-size:9pt;">「……羅斯王國雖屬異教,其民中卻有許多基督徒,亦有猶太人與撒拉森人。在市集上,有一人知我是基督徒,便要賣我一只聖杯,說那正是承接了我主耶穌基督之血的聖杯。然而我去過耶路撒冷,也到過安提阿,見過太多騙子與江湖術士,拿聖人的骸骨、十字架的碎片、基督衣袍的殘縷來兜售。而他手上那只杯,<u>不過是賤金屬所製、樸素無紋</u>,斷不可能是我主那只榮耀的聖杯……」</p>
+    </div>
+  </div>
+  <div class="pno">5</div>
+</section>
+
+<!-- ============ 第 6 頁:Eleanora 信 ============ -->
+<section class="page">
+  <div class="rh" style="text-align:right;">LucasArts Classic Adventures</div>
+  <div class="letterpage">
+    <div class="letter script-head">
+      <div class="head-block">埃莉諾拉·費勒斯-蘭斯多恩夫人<br>梅多斯莊園<br>伯克郡 切特菲爾德</div>
+      <p>一九二三年六月二日</p>
+      <div class="sp"></div>
+      <p>親愛的亨利:</p>
+      <p class="indent">今日我以一種意想不到的方式想起了你。當時我正與 A——·D—— 爵士共飲下午茶——他是位紳士,卻算不上學者。他年輕時,曾是已故冒險家暨語言學家理查·伯頓爵士的密友。你也知道,理查爵士辭世後,伯頓夫人把他許多無價的東方遊歷日記付之一炬,認為那些內容淫穢不堪。如今 A—— 爵士告訴我,他當年從火中搶救出了幾片理查爵士的殘稿,其中一片,據他描述,想必會引起你的興趣。事情似乎是這樣的:在某個伊斯蘭國度,一位蘇非導師曾告訴理查爵士,他知道「那只異教徒奉為聖杯的陶缽」之所在;說它「飾有異教的紋樣」,上面的文字既非阿拉伯文,「也不是猶太人、希臘人,或他生平所見任何一族的文字」。可惜這片倖存的殘稿並未透露這位摩爾人是在何處見過此器;只說他「自城東行」,還提到「通過三道試煉」。其餘的,都燒掉了。</p>
+      <p class="indent">我時常想念你,也盼著有朝一日,你的追尋能把你帶回英格蘭。一如往昔,我是你的,</p>
+      <div class="sp"></div>
+      <p class="rt sig">埃莉諾拉·費勒斯-蘭斯多恩</p>
+    </div>
+  </div>
+  <div class="pno">6</div>
+</section>
+
+<!-- ============ 第 7 頁:報紙剪報 ============ -->
+<section class="page">
+  <div class="rh">Indiana Jones and the Last Crusade</div>
+  <div class="body">
+    <div class="clip">
+      <p class="headline">新發現福音書<br>真偽受質疑</p>
+      <div class="news">
+        <p><span class="dateline">亞歷山卓(路透社電)</span>——大英博物館消息人士今日透露,專家檢視上月出土的所謂《亞利馬太的約瑟福音書》後,已對該文件的真實性投下疑雲。</p>
+        <p>這份手稿出土於科茲拉的廢墟——一處正由考古學家在此地以南發掘的早期基督教聚落——是一份前所未見、關於基督生平的記述,據稱出自亞利馬太的約瑟之手;按《新約》所載,正是這位「財主」在基督受難後將其安葬。</p>
+        <p>這卷以古埃及科普特文寫成的莎草紙,在發掘隊領隊、常春藤大學的羅伯特·霍斯博士公開之初,曾被教界與俗世學者一致譽為「千年一遇的大發現」。然而,與霍斯考察隊關係密切的其他專家則認為,此文件成書最早不過西元二世紀末,甚至可能晚至七世紀。</p>
+        <p>「作為一份目擊者的記述,這卷『約瑟』莎草紙就是不對勁,」一位要求匿名的權威人士表示,「它太有中世紀傳奇的味道了。聖杯那一套東西,在早期基督教文獻裡根本沒有立足之地。」</p>
+        <p>所謂的聖杯,即據傳耶穌在最後晚餐所用、約瑟用以承接其十字架上之血的那只酒杯,在這份手稿中佔有顯著篇幅。約瑟把它描述成一只樸素的青銅淺皿,自從與耶穌沾上關係之後,它便「常散發甜美的香氣,並閃耀著天國之光」。</p>
+        <p>在亞瑟王傳奇與其他中世紀傳說中,聖杯成了眾人崇敬、騎士追尋的對象。</p>
+      </div>
+      <p class="clip-note">傳奇個鬼!我得儘早去找霍斯談談!</p>
+    </div>
+  </div>
+  <div class="pno">7</div>
+</section>
+
+<!-- ============ 第 8 頁:Staubig 信 ============ -->
+<section class="page">
+  <div class="rh" style="text-align:right;">LucasArts Classic Adventures</div>
+  <div class="letterpage">
+    <div class="letter center-head">
+      <p class="hdr">沃爾夫岡·S·施陶比希 博士<br>德意志 海德堡</p>
+      <div class="sp"></div>
+      <p style="text-align:left;">一九三二年九月十四日</p>
+      <div class="sp"></div>
+      <p style="text-align:left;">我親愛的瓊斯博士:</p>
+      <p class="indent" style="text-align:left;">我本該為這許久的音訊全無向您致歉,若不是我確信,我帶來的消息將使任何道歉都顯得多餘。上月度假時,我在杜布羅夫尼克的一家古書店裡,發現了一部看來貨真價實的《梅林咒語之書》手稿。您也知道,這部凱爾特魔法的禁忌彙編,其最後一份已知抄本早在一三八四年便遭宗教裁判所焚毀,因此我這一部,或許是世上孤本。</p>
+      <p class="indent" style="text-align:left;">我很樂意在您下次來訪時,讓您一覽這份手稿;不過我想,您一定迫不及待想知道,書中竟有一幅彩飾,描繪的正是一件您格外感興趣之物。它被描述為一只白鑞聖杯,杯座外侈。在杯緣下方的一圈,以亞蘭文鏨著「<span class="latin">av bar ruach ha-kodesh</span>」——聖父、聖子、聖靈。您也會同意,對一部歸於某巫師名下的著作而言,這咒語倒也相稱,因為這句早期基督教的祈禱詞,據信正是術士那句「阿布拉卡達布拉」的源頭。</p>
+      <p class="indent" style="text-align:left;">書中,「梅林」提供了一道用來召喚出此器影像的咒語。可惜這道咒文並非以拉丁字母轉寫,而是以盧恩符文寫成;那些修道院的抄寫員顯然不識這些奧秘的符號,把它們抄成了一堆胡言亂語。都柏林的歐洛赫蘭教授躍躍欲試,想還原這些符文;一位名叫貝洛克的年輕法國學者也表達了同樣的意願。(順帶一問,您認得他嗎?他學問淵博,令人佩服,只是我頗不喜歡他與敝國某些政治勢力的往來。)</p>
+      <p class="indent" style="text-align:left;">無論如何,我盼這樁喜出望外的發現,能促成您早日來訪。瓊斯博士,自我倆上次舉杯互祝健康至今,實在已太久太久了。</p>
+      <div class="sp"></div>
+      <p style="text-align:left;">您最忠實的,</p>
+      <div class="sp"></div>
+      <p style="text-align:left;" class="sig">施陶比希</p>
+    </div>
+  </div>
+  <div class="pno">8</div>
+</section>
+
+<!-- ============ 第 9 頁 ============ -->
+<section class="page">
+  <div class="rh">Indiana Jones and the Last Crusade</div>
+  <div class="body">
+    <div class="cols dense">
+      <p class="noindent"><strong>科羅拉多州拉斯梅薩斯</strong><br>一九〇五年十一月十四日</p>
+      <p>今夏我那趟歐洲之行所播下的種子,已開始結出果實:今日收到一封極有意思的信,來自我在牛津結識的年輕學者馬可斯·布洛迪。他告訴我,布列塔尼海岸的坎塔內茲修道院藏有幾份古愛爾蘭手稿,其中一份據說提到了聖杯,且是把它當成真實存在之物、而非傳說來談的。我等不及明年再去親自查證了!</p>
+      <p>此刻,我終於覺得我的追尋真正開始了。每當我想起亞瑟王朝那些心無旁騖的騎士——他們似乎只為了偶爾屠一條龍、或解救一城堡待嫁的少女,才暫時擱下自己對聖杯的追尋——我便清楚地看到:他們之中,沒有一個人需要為了養家、撫育妻兒而操心。</p>
+      <p>平心而論,我這趟追尋裡並沒有龍要對付——只有偶爾出沒的蛇。眼下,小子正在他房裡生悶氣;他不知怎地把一條相當大的蛇弄進了我的書桌抽屜,因而被罰禁足。這孩子膽子真不小——他要不是在地窖裡獵田鼠、跟保留區來的印第安孩子四處亂跑,就是在惹些什麼麻煩。不過他聰明得很——已經能用拉丁文和希臘文數到二十(還會用納瓦霍語罵得震天價響)——我有信心能把他栽培成一名學者。</p>
+
+      <p class="entry noindent"><strong>科羅拉多州拉斯梅薩斯</strong><br>一九一二年二月二十二日</p>
+      <p>距我上次提筆,竟真的已過了六年?學術上的責任、經費的短缺、為人父的擔子,真能讓我如此長久地荒廢了我的追尋?其中最沉重的,莫過於瑪麗的不幸辭世——這一擊,我與小子至今都未能平復。我恐怕自己無力獨自撫養一個兒子——小子一個月比一個月更野、更難管教——然而我的心,容不下任何別的女人,來取代瑪麗那無可替代的位置。</p>
+      <p>現實所迫,這些年我或許不得不把心力投注在較傳統的學術與教學職責上,但我絕未背棄我那神聖的誓言。看來,我並非唯一追逐這則「傳奇」的學者。還有別的「怪人」與我懷抱同樣的熱情;另有一些人,雖則存疑,卻仍縱容我這不入流的興趣,並隨時讓我知曉關於聖杯傳說的新發現。或許,在他們靈魂深處,藏著比他們願向各自學術機構透露的、還要多的浪漫。除了牛津的年輕布洛迪,還有德國的施陶比希、波隆那那位卓越的拜占庭學者科迪羅利,甚至還有一位巴格達的阿拉伯人,如此好心地把相關資訊轉達給我這個「異教徒」。下次休假,我務必把他們全都見上一面。</p>
+      <p>今日我收到科迪羅利一封電報,正是它促成了這則拖延已久的日記。我最迫不及待想看的,是他將在巡迴講學途中帶來的那本熱那亞的保羅的日記。他要搭乘那艘今冬鬧得滿城風雨的新豪華郵輪「鐵達尼號」的首航出發。真叫我羨慕!</p>
+
+      <p class="entry noindent"><strong>費城</strong><br>一九一六年八月十九日</p>
+      <p>無論從哪方面看,這都是慘澹的一年。先是那場歐戰,再度迫使我延後了期盼已久的研究年假。接著是我與小子的決裂,這對我精神的重創,即便在這本私人日記裡,我也難以啟齒。而如今,在這場學術會議上,又是冷嘲熱諷,雪上加霜。</p>
+      <p>上帝啊,求祢賜我堅持下去的意志力!有時候,我的決心幾乎要崩潰。這禮拜我宣讀了兩篇關於中世紀文學主流課題的精彩論文;然而我所到之處,聽見的都是「加拉哈德爵士駕到」、「聽說你跑去北極找歷史上真有其人的聖誕老人啦」、「來來來,瓊斯,我們給你留了『危險席位』!」——最後這句出自卡魯瑟斯之口。兩年前在舊金山,他吹噓自己從玻利維亞某古董商手中購得一只「貨真價實的十五世紀印加葬甕」,我當眾指出杯緣正下方那行小字寫著「日本製」,叫他下不了台;他這口氣,至今還沒消。</p>
+      <p>而前幾天,他可算是回敬了我。氣死人了!我本不該理會這種人的屈尊俯就——天曉得我受夠了——可我實在得拚命壓住,才沒往他那張得意的賤笑臉上揍一拳。沒錯。亨利·瓊斯,拉斯梅薩斯之光。也許我終究配不上尋得聖杯。</p>
+    </div>
+  </div>
+  <div class="pno">9</div>
+</section>
+
+<!-- ============ 第 10 頁 ============ -->
+<section class="page">
+  <div class="rh" style="text-align:right;">LucasArts Classic Adventures</div>
+  <div class="body">
+    <div class="cols dense">
+      <p class="noindent"><strong>喬治·S·皮爾金頓號輪船上</strong><br>北大西洋<br>一九二〇年六月二十九日</p>
+      <p>我終於能正經八百地重拾研究了!距我上次見到舊大陸,難道真的已隔十四年了嗎?大戰結束,歐洲再度敞開;在我回普林斯頓履職之前,我有整整一年可以在廢墟與圖書館裡四處鑽探了!我那「正當」的學術成就,如今已獲得足夠的肯定,儘管學界仍視我的追尋為異想天開的執念,那所聲名顯赫的學府還是給了我終身教職。離開四角落地區,我並不覺得可惜。我固然珍惜沙漠的清靜,但它離中世紀研究的主流太遠,也承載了太多關於瑪麗的回憶。</p>
+      <p>還有小子。儘管他斷定這個州容不下我倆二人、最終決定離家,他卻是真心愛科羅拉多的;他離家前那一年裡,對古老的阿納薩齊遺址所做的那番有條理的探勘,曾讓我燃起希望,以為我到底還是養出了一名學者。</p>
+      <p>我不知道我兒子如今身在何方。我祈求他平安、健康、別蹲在牢裡。他寧可去過一種放蕩沉淪的生活,也不肯接受大學教育——更別提認他這個父親了——一想到這裡,我的心仍會碎。無論他在哪兒,我猜他此刻不是策馬馳騁於荒野,就是開著汽車四處橫衝直撞,要不就是又害哪個年輕姑娘惹上了麻煩。(就在今晚,我在散步甲板上,正與一位晚餐時結識的年輕女士聊天、心中泛起些許旖旎之情——直到我驚覺,這位談起女性解放、地下酒吧與佛洛伊德博士那些傷風敗俗理論時如此直言不諱的女子,竟與小子年紀相仿!這讓我頓覺自己老態龍鍾。)</p>
+
+      <p class="entry noindent"><strong>「紫龍」酒館,威爾斯莫赫德雷夫</strong><br>一九二〇年七月二十七日</p>
+      <p>找到了!正當我開始懷疑這趟威爾斯之行是場徒勞無功的瞎忙時,我們竟誤打誤撞地闖進了這座村莊。一則當地民間傳說提到,編年史中被稱為梅林門徒與同伴的詩人塔利埃辛,曾在亞瑟王死後、圓桌騎士的情誼瓦解之後,來到這座山谷。當地人是最熱心的報信者——前提是我先向他們引用幾句塔利埃辛的詩句、並在客棧的公共廳裡一杯接一杯地跟他們拚酒,證明了自己夠格。據說塔利埃辛能變換形體;當地一個傳說是,這位詩人常化作一隻鷹,觀察騎士們的舉動。據說他有一次,曾凝望隱居的帕西法爾爵士(按:不是後來的記載所說的加拉哈德),其時帕西法爾已完成聖杯的追尋;而關於那件聖物,這位吟遊詩人吟唱過一段詩,我已記在這本筆記的別處。</p>
+      <p>令我難堪的是,今晨我醒來時,腦袋裡彷彿插了把斧頭,躺在當地監獄的一張草蓆上。我承認昨晚是喝多了些,但唯有十幾名目擊者鄭重的證詞,才能讓我相信:我昨晚確實是站在「紫龍」酒館的吧台上,扯著嗓子高唱一串耶魯校園歌曲收的場。更糟的是,布洛迪幾乎花了一上午才找到路來替我繳罰款。一個能像獵犬般憑直覺嗅出珍稀手稿的人,怎麼會在一座只有二十戶人家的村子裡迷路,這謎團恐怕只有造物主才解得開。</p>
+
+      <p class="entry noindent"><strong>義大利波隆那</strong><br>一九二〇年九月二十九日</p>
+      <p>科迪羅利依舊叫我嘆服。他已年過七十,精力卻不輸二十歲的小伙子。此刻他正在外頭某處飲酒作樂,留我獨自鑽研他在戰爭那幾年驚人勞作的成果。對他而言,敵對的邊界從不是障礙,革命也不是;他有辦法潛入君士坦丁堡(如今我們得改稱伊斯坦堡了!),潛入俄國(如今我們得改稱蘇聯了!!),還帶出一些最教人驚異的東西。</p>
+      <p>此刻擺在我面前的,是這件奇珍——一份得自克里米亞卡法廢墟的羊皮卷。那是一名猶太醫生以典雅的拜占庭希臘文寫成的見證,他曾於一二六七年在該城,隨侍一名方濟各會修士臨終。說來也巧,這正是學術史上那種令人欣喜的偶合——這名修士,正是當年在克拉森海姆繪下那幅我多年前所見的「耶穌受難圖」的同一人——也就是那位據說曾遇見一名十字軍騎士、而騎士聲稱自己與兄弟們找到了聖杯的修士!</p>
+    </div>
+  </div>
+  <div class="pno">10</div>
+</section>
+
+<!-- ============ 第 11 頁 ============ -->
+<section class="page">
+  <div class="rh">Indiana Jones and the Last Crusade</div>
+  <div class="body">
+    <div class="cols dense">
+      <p class="noindent">那名醫生記述,這修士心中苦悶,深恐墮入地獄,因為他「多年來明知聖杯所在,卻因自認不配『感受上帝的氣息而得生,踐上〔?〕上帝的話語而得救,或行走上帝的道路而不墜入深淵』,而未能將它歸還基督教世界」。</p>
+      <p>這一切是什麼意思,我毫無頭緒,但我必須相信:對一個掌握了正確知識的人而言,這段話指明了聖杯的所在!</p>
+      <p>此外,我面前還有科迪羅利另一項發現的譯本,是一份年代更早得多的拜占庭商人記述,對此物又給出一種令人困惑的描述。它的來歷——俄國——與其年代——十世紀中葉——都暗示它與我在坎塔內茲尋得的那片殘篇有所關連,後者提到維京人從艾奧納島盜走了聖杯。從基輔出發,在那幾個世紀頻繁的貿易與劫掠之中,它大可一路南下,流落到第一次十字軍的騎士可能尋得它的地方。</p>
+      <p>賓根是一場空。賓根的女修道院長希爾德加德卷帙浩繁的手稿中,並沒有任何能解開聖加侖抄本那幾個樂音的線索;而目睹戰爭在萊茵蘭造成的滿目瘡痍,更令我沮喪。但這一路走來,何其曲折!再多幾項這樣的發現,我或許就能在不得不返鄉之前,尋得聖杯了!</p>
+
+      <p class="entry noindent"><strong>阿塔蘭塔號輪船上</strong><br>北大西洋<br>一九二一年六月二十一日</p>
+      <p>仲夏之日。阿塔蘭塔號正橫越一片風平浪靜的海面向西航行,載我自一趟——平心而論我只能算是失敗的——航程返家。這個夏天幾個月的初步成功,已被隨後三季的虛假線索、死胡同與功虧一簣所掩蓋——在義大利、德國、巴爾幹、土耳其與近東皆是如此。我不能說這一年全無樂趣——聖地是一次珍貴的經歷,更別提我與 E. 夫人的那場邂逅了!——但就我的追尋而言,波隆那之後,一切都是失望與挫敗。</p>
+      <p>然而我還有普林斯頓可以期待,有學術上的新冒險,有重返舊大陸的未來機會。我才不過四十五歲,而我有科迪羅利為榜樣,可見人到晚年仍能成就一番事業。追尋聖杯是一生的志業。我在二十年前領受了這項使命,我只能相信,我是被某種更高的力量選中來完成它的。</p>
+
+      <p class="entry noindent"><strong>麻薩諸塞州劍橋</strong><br>一九二八年十月二日</p>
+      <p>終於見到了霍斯的莎草紙。關於它真偽的爭議,我無話可添,那種事也只有神學家才會在意。它顯然極為古老,且無論是否真為亞利馬太的約瑟的目擊記述,對史學家都有其價值。無論如何,它都是一份謄抄兼翻譯:約瑟會用亞蘭文、或許希臘文書寫,絕不可能用科普特文,因為後者直到約莫西元二百年才成為書面文字。唯有當我尋得我追尋之物,我才能證實作者描述的準確與否。</p>
+      <p>我聽起來很灰心嗎?或許吧,畢竟這些年來盡是落空的希望、靠不住的發現與失望。或許我是灰心了。追尋聖杯,就是追尋我們每個人心中那一點神性的火花。但此刻,我只覺自己渺小如凡塵,我怕我這一生,都虛擲在追逐一個幻影上了。</p>
+
+      <p class="entry noindent"><strong>英格蘭索爾茲伯里</strong><br>一九三〇年九月十七日</p>
+      <p>我在發抖,卻既非因寒冷,也非因恐懼。</p>
+      <p>我此刻在一間囚室裡寫下這則日記,是大教堂一位議事司鐸好心借我棲身的。今夏,一名做修繕的石匠,在這建築石造結構高處一個隱密的壁龕裡,發現了一部殘破不堪的聖安瑟莫日記抄本。上月布洛迪已電報告知我這項發現。這份手稿何以會出現在這裡、而非安瑟莫任大主教的坎特伯里,我不得而知;但它看來是被刻意藏起的,因為其中有一處極不像安瑟莫風格、近乎見異象的闕漏,某位神父或許判定其為「撒旦的東西」。謝天謝地,這位不知名的神父並沒有把手稿徹底毀去!</p>
+    </div>
+  </div>
+  <div class="pno">11</div>
+</section>
+
+<!-- ============ 第 12 頁:插圖 + 解析 ============ -->
+<section class="page">
+  <div class="rh" style="text-align:right;">LucasArts Classic Adventures</div>
+  <div class="body">
+    <figure class="illu">
+      <img src="data:image/png;base64,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" alt="安瑟莫手稿中的機械裝置摹本:狀似鐘擺的機關與一名彷彿凌空而行之人">
+    </figure>
+    <div class="cols dense">
+      <p class="noindent">這段文字看來可追溯至這位偉大神學家自英格蘭流亡的時期。在一段關於聖父本質的典型哲學論述當中,安瑟莫忽然中斷,寫下了這幾個字:<span class="smc">EQUESTRI SEPULCRUM IN</span>(字跡模糊)<span class="smc">REGINA</span>(字跡模糊)<span class="smc">DALMATIAE</span>——「達爾馬提亞女王(其名?)的(地下墓室中的?)騎士之墓」。</p>
+      <p>這句話下方,是一只酒杯被光輪環繞的粗略圖樣,杯上方寫著 <span class="smc">CHRISTI CALIX</span>——基督之杯。而在<u>這</u>下方,又寫著下面這段文字:</p>
+      <p>「試煉將有三道。其一,上帝的氣息,唯謙卑悔罪者可通過。其二,上帝的話語,唯循上帝的足跡而行者可前進。其三,上帝的道路,唯自獅頭縱身一躍者,方證其價值。」在這幾行字旁的頁緣空白處,有兩幅圖樣(即此處所摹),畫的是一具狀似鐘擺的機械裝置,以及一個彷彿凌空而行的人。</p>
+      <p>上帝的氣息、上帝的話語、上帝的道路——這幾個如謎一般的字眼,在聖安瑟莫死後一個半世紀有餘,又一字不差地,由那位知曉聖杯所在的方濟各會修士說了出來——說得彷彿它們是某種他自認不配通過的試煉。</p>
+      <p>霎時間,一切開始串連起來:</p>
+      <p class="noindent">• 安瑟莫與那名修士,指的都是這三道試煉。</p>
+      <p class="noindent">• 伯頓的殘稿提到「通過三道試煉」。</p>
+      <p class="noindent">• 熱那亞的保羅那本失蹤的日記,提到聖杯由「致命的防護機關」守衛。</p>
+      <p class="noindent">• 安瑟莫手稿裡的這幅圖,八成就是某種致命的機關!</p>
+      <p class="noindent">• 女修道院長希爾德加德在她的聖杯異象中,聽見了「你將藉以開啟此墓」的樂音。</p>
+    </div>
+  </div>
+  <div class="pno">12</div>
+</section>
+
+<!-- ============ 第 13 頁(右半留白) ============ -->
+<section class="page">
+  <div class="rh">Indiana Jones and the Last Crusade</div>
+  <div class="body">
+    <div class="cols dense">
+      <p class="noindent">• 聖安瑟莫在此把聖杯與「達爾馬提亞女王城中的騎士之墓」連在一起——達爾馬提亞,正是南斯拉夫海岸的拉丁文舊稱。</p>
+      <p class="noindent">• 「那名騎士」可能就是那位告訴修士聖杯何在的第一次十字軍騎士。</p>
+      <p>達爾馬提亞女王城中的騎士之墓!我明天就動身前往巴黎,再從那裡搭東方快車到貝爾格勒!</p>
+
+      <p class="entry noindent"><strong>普林斯頓</strong><br>一九三二年十月一日</p>
+      <p>今日收到施陶比希的來信。《梅林咒語之書》竟會在杜布羅夫尼克現身,何其諷刺!若不是兩年前我在南斯拉夫遍尋聖杯而一無所獲、至今仍滿腹苦澀,我本該為他這發現更興奮些。梅林這份聖杯記載確實提供了某種關連——那段亞蘭文銘文,與卡法羊皮紙所述的那段一模一樣——但它並未讓我離那件已躲了我三十四年的寶物更近一步。它究竟長什麼樣子?如今我手上已有十種關於聖杯的描述,沒有兩種相同。它究竟藏在何處?我只有一張幾乎毫無用處的地圖,和一句語焉不詳、提到可由一段樂句開啟的「達爾馬提亞女王城中」騎士之墓的引文。多謝了,施陶比希先生,只可惜您的發現,正落在「太少,也太遲」這一類。</p>
+      <p>關於小子的消息,仍不斷透過大眾報刊傳到我耳裡,最近一則來自印度支那,據說他正在那兒追尋一尊玉偶——「楞川的惡魔猴」——傳言它具有某種神祕的力量。我實在無法理解他何以對這類荒誕不經之物如此著迷。我的天,他接下來又要去追什麼?西博拉的失落之城?約櫃?我怎麼會養出這樣一個兒子?</p>
+      <p>還有,他為什麼非得用那個荒唐可笑的名字不可?</p>
+
+      <p class="entry noindent"><strong>紐約</strong><br>一九三七年十二月九日</p>
+      <p>我真是個大傻瓜!七年多來,我一直把開啟聖杯的鑰匙握在手心,卻沒能認出它!</p>
+      <p>不是南斯拉夫,而是威尼斯。安瑟莫手稿中那句晦澀的引文,應當重構為 <span class="smc">EQUESTRI SEPULCRUM IN URBE REGINA MARIS DALMATIAE</span>——「達爾馬提亞之海的女王城中的騎士之墓」——也就是亞得里亞海。威尼斯——亞得里亞海的女王——正是我將尋得騎士之墓的所在。而在那墓中,將能找到一個指向聖杯位置的「標記」!</p>
+      <p>我是如何得知這一切的,此刻我激動難抑,故事太長,實在無暇細表。我正下榻於廣場飯店的一間豪華套房,是一位名叫華特·唐納文的人為我安排的;他是個富有的實業家暨古董收藏家,長年資助學術機構與博物館。他手中握有那名修士的編年史——就是那位死於卡法、從一百五十歲的十字軍口中得知聖杯所在、如此這般如此這般的修士——而更令人驚異的是,他還握有一塊殘缺的石板,正是那三兄弟留給聖杯追尋者的「標記」。唐納文已允許我為石板上那段殘缺的銘文做一份拓本;但根據那修士的記載,還有第二個「標記」,可能通往聖杯,與那騎士的兄弟同葬。</p>
+      <p>騎士之墓!</p>
+      <p>我關於威尼斯的洞見,我一直祕而不宣。唐納文與我一樣急於找到這第二個「標記」;他有大筆資金可投入這項計畫,而今晚,他已邀我主持他的研究團隊。一旦我能從普林斯頓的職責中脫身,我就要啟程——不,是飛——往柏林,去會一位施奈德博士,他將與我共事此案。在我準備好出發之前,我無意提及威尼斯。唐納文很可能會讓這位施奈德拋下我先行展開調查。(我從沒聽過什麼施奈德。得問問施陶比希認不認得他。)再說,萬一我判斷錯了,那可就相當難堪了。</p>
+      <p>但我沒錯。這一次,我確信無疑。</p>
+    </div>
+  </div>
+  <div class="pno">13</div>
+</section>
+
+<!-- ============ 封底 ============ -->
+<section class="page back">
+  <div class="copy">
+    © 1989, 1992 Lucasfilm Ltd. and LucasArts Entertainment Company. All rights reserved. <em>Indiana Jones and the Last Crusade</em>, <em>Indiana Jones and the Fate of Atlantis</em>, <em>Indiana Jones</em>, and the LucasArts logo are trademarks of Lucasfilm Ltd., used under authorisation. iMUSE U.S. Patent No. 5,315,057.
+    <br><br>
+    繁體中文版聖杯日記 · 同人中文化專案,僅供個人保存與致敬,不作商業用途。
+  </div>
+</section>
+
+</body>
+</html>
